@@ -1,0 +1,81 @@
+NAME="${TEMPLATE_NAME}"
+LOGO="images/logos/windows8.png"
+HYPERVISOR="kvm"
+
+CPU="0.5"
+CPU_MODEL=[ MODEL="EPYC-IBPB", FEATURES="svm" ]
+VCPU="4"
+TOPOLOGY=[ CORES="4", SOCKETS="1", THREADS="1" ]
+
+MEMORY="8192"
+MEMORY_RESIZE_MODE="BALLOONING"
+MEMORY_UNIT_COST="MB"
+
+HOT_RESIZE=[
+  CPU_HOT_ADD_ENABLED="YES",
+  MEMORY_HOT_ADD_ENABLED="YES"
+]
+
+OS=[
+  ARCH="x86_64",
+  BOOT="disk0",
+  FIRMWARE="/usr/share/OVMF/OVMF_CODE.secboot.fd",
+  FIRMWARE_SECURE="YES",
+  MACHINE="q35",
+  SD_DISK_BUS="scsi"
+]
+
+FEATURES=[
+  ACPI="yes",
+  APIC="yes",
+  GUEST_AGENT="yes",
+  HYPERV="yes",
+  PAE="yes",
+  LOCALTIME="yes",
+  VIRTIO_SCSI_QUEUES="auto"
+]
+
+GRAPHICS=[
+  LISTEN="0.0.0.0",
+  TYPE="VNC",
+  RANDOM_PASSWD="YES"
+]
+
+VIDEO=[
+  ATS="YES",
+  IOMMU="YES",
+  RESOLUTION="1366x768",
+  TYPE="virtio",
+  VRAM="65536"
+]
+
+DISK=[
+  CACHE="unsafe",
+  DEV_PREFIX="sd",
+  DISCARD="unmap",
+  IMAGE_ID="${IMAGE_ID}"
+]
+
+CONTEXT=[
+  DEV_PREFIX="sd",
+  NETWORK="YES",
+  PASSWORD="$USER[PASSWORD]",
+  SSH_PUBLIC_KEY="$USER[SSH_PUBLIC_KEY]",
+  USERNAME="$USER[USERNAME]",
+  TIMEZONE="Central Europe Standard Time",
+  EJECT_CDROM="YES"
+]
+
+
+INPUT=[
+  BUS="usb",
+  TYPE="tablet"
+]
+
+NIC=[
+  NETWORK="503-usrpriv",
+  NETWORK_UNAME="oneadmin",
+  RDP="YES",
+  SSH="YES",
+  SECURITY_GROUPS="0"
+]
