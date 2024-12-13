@@ -1,2 +1,4 @@
+.gitignore
+one-apps
 *.sh
 *.tmpl
