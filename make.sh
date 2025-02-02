@@ -59,11 +59,11 @@ create_container ()
         --device /dev/kvm \
         -p 127.0.0.1:5900-6000:5900-6000 \
         --volume "$one_apps_dir:/one-apps:O"  \
-        --volume "$build_dir:/one-apps/build:rw,Z" \
-        --volume "$context_windows_out_dir:/one-apps/context-windows/out:rw,Z" \
-        --volume "$context_linux_out_dir:/one-apps/context-linux/out:rw,Z" \
-        --volume "$export_dir:/one-apps/export:rw,Z" \
-        --volume "$iso_dir:/one-apps/packer/windows/iso:ro,Z" \
+        --volume "$build_dir:/one-apps/build:rw,z" \
+        --volume "$context_windows_out_dir:/one-apps/context-windows/out:rw,z" \
+        --volume "$context_linux_out_dir:/one-apps/context-linux/out:rw,z" \
+        --volume "$export_dir:/one-apps/export:rw,z" \
+        --volume "$iso_dir:/one-apps/packer/windows/iso:ro,z" \
         "$podman_image_tag"
     ) || { 
         write_stderr "Failed to create container"
