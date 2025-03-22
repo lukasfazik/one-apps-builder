@@ -1,6 +1,7 @@
 
 stages:
   - build-container
+  - build-addon-context
   - build-images
   - deploy-images
 
@@ -10,6 +11,12 @@ build-container-job:
     - echo "Preparing opennebula-tools..."
     - echo "Preparing packer..."
     - echo "Preparation complete complete."
+
+build-addon-context-job:
+  stage: build-addon-context
+  script:
+    - echo "Building context windows"
+    - echo "Building context linux"
 
 build-images-job:
   stage: build-images
