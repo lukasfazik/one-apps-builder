@@ -1,0 +1,24 @@
+
+stages:
+  - build-container
+  - build-images
+  - deploy-images
+
+build-container-job:
+    stage: build-container
+    script:
+    - echo "Preparing opennebula-tools..."
+    - echo "Preparing packer..."
+    - echo "Preparation complete complete."
+
+build-images-job:
+  stage: build-images
+  script:
+    - echo "Building images using packer..."
+    - echo "Build complete."
+
+deploy-images-job:
+  stage: deploy-images
+  script:
+    - echo "Deploying images to Stratus FI..."
+    - echo "Images successfully deployed."
