@@ -1,4 +1,6 @@
 
+image: debian:12-slim
+
 stages:
   - build-container
   - build-addon-context
