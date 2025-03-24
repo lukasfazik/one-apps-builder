@@ -6,6 +6,7 @@ stages:
   - build-addon-context
   - build-images
   - deploy-images
+  - delete-images
 
 build-container-job:
     stage: build-container
@@ -31,3 +32,11 @@ deploy-images-job:
   script:
     - echo "Deploying images to Stratus FI..."
     - echo "Images successfully deployed."
+
+delete-images-job:
+  stage: delete-images
+  script:
+    - echo "Removing VM template..."
+    - echo "VM template removed successfully."
+  when: manual
+  manual_confirmation: 'Are you sure you want to delete the added template with images?'
