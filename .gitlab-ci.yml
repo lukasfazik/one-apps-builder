@@ -11,7 +11,10 @@ stages:
   - delete-images
 
 build-container-job:
-  image: quay.io/podman/stable
+  image:
+    name: quay.io/podman/stable
+    docker:
+      user: podman
   stage: build-container
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
