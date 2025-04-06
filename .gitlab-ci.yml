@@ -12,7 +12,7 @@ stages:
 
 build-container-job:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $BUILD_TYPE == "one-apps-builder"
   image:
     name: quay.io/podman/stable
     docker:
