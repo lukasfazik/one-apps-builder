@@ -11,6 +11,8 @@ stages:
   - delete-images
 
 build-container-job:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   image:
     name: quay.io/podman/stable
     docker:
