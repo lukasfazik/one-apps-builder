@@ -1,5 +1,7 @@
+variables:
+    IMAGE_NAME: "$CI_REGISTRY_IMAGE/one-apps-builder"
 
-image: debian:12-slim
+image: $IMAGE_NAME
 
 stages:
   - build-container
@@ -9,11 +11,16 @@ stages:
   - delete-images
 
 build-container-job:
-    stage: build-container
-    script:
-    - echo "Preparing opennebula-tools..."
-    - echo "Preparing packer..."
-    - echo "Preparation complete complete."
+  image: quay.io/podman/stable
+  stage: build-container
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+  script:
+    - echo "Building container..."
+    - podman build -t "$IMAGE_NAME" .
+    - echo "Uploading container..."
+    - podman push "$IMAGE_NAME"
+
 
 build-addon-context-job:
   stage: build-addon-context
