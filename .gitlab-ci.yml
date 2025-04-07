@@ -12,7 +12,9 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "web"
 
 default:
-  image: $IMAGE_NAME
+  image:
+    name: $IMAGE_NAME
+    entrypoint: ["/bin/bash", "-c"]
 
 stages:
   - build-container
