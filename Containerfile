@@ -17,5 +17,3 @@ RUN curl -s https://downloads.opennebula.io/repo/repo2.key | \
     gpg --dearmor --yes --output /etc/apt/keyrings/opennebula.gpg && \
     echo "deb [signed-by=/etc/apt/keyrings/opennebula.gpg] https://downloads.opennebula.io/repo/6.10/$(lsb_release -is)/$(lsb_release -rs) stable opennebula" > /etc/apt/sources.list.d/opennebula.list && \
     apt-get update && apt-get install -y opennebula-tools
-# Run bash
-ENTRYPOINT [ "bash" ]
