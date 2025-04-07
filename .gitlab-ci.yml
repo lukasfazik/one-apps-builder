@@ -1,6 +1,11 @@
 variables:
     IMAGE_NAME: "$CI_REGISTRY_IMAGE/one-apps-builder"
 
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+
 image: $IMAGE_NAME
 
 stages:
