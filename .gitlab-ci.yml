@@ -1,4 +1,6 @@
 variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_SUBMODULE_FORCE_HTTPS: true
     IMAGE_NAME: "$CI_REGISTRY_IMAGE/one-apps-builder"
     BUILD_TYPE:
       value: "images"
@@ -6,6 +8,7 @@ variables:
       options:
         - "one-apps-builder"
         - "images"
+
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
@@ -24,6 +27,8 @@ stages:
 build-container-job:
   rules:
     - if: $BUILD_TYPE == "one-apps-builder"
+  variables:
+    GIT_SUBMODULE_PATHS: ":(exclude)one-apps"
   image:
     name: quay.io/podman/stable
     docker:
