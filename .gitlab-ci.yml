@@ -1,6 +1,11 @@
 variables:
     IMAGE_NAME: "$CI_REGISTRY_IMAGE/one-apps-builder"
-
+    BUILD_TYPE:
+      value: "images"
+      description: "Which pipeline to creste (buid one-apps-builder image or build one-apps images)"
+      options:
+        - "one-apps-builder"
+        - "images"
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
@@ -17,7 +22,7 @@ stages:
 
 build-container-job:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule" && $BUILD_TYPE == "one-apps-builder"
+    - if: $BUILD_TYPE == "one-apps-builder"
   image:
     name: quay.io/podman/stable
     docker:
@@ -33,24 +38,32 @@ build-container-job:
 
 
 build-addon-context-job:
+  rules:
+    - if: $BUILD_TYPE == "images"
   stage: build-addon-context
   script:
     - echo "Building context windows"
     - echo "Building context linux"
 
 build-images-job:
+  rules:
+    - if: $BUILD_TYPE == "images"
   stage: build-images
   script:
     - echo "Building images using packer..."
     - echo "Build complete."
 
 deploy-images-job:
+  rules:
+    - if: $BUILD_TYPE == "images"
   stage: deploy-images
   script:
     - echo "Deploying images to Stratus FI..."
     - echo "Images successfully deployed."
 
 delete-images-job:
+  rules:
+    - if: $BUILD_TYPE == "images"
   stage: delete-images
   script:
     - echo "Removing VM template..."
