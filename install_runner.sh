@@ -33,7 +33,7 @@ if [ ! -f "$READY_FILE" ]; then
         # Install docker
         apt-get update && apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
         # Register the runner
-        gitlab-runner register --non-interactive --executor docker --docker-image alpine:latest --docker-devices "/dev/kvm"
+        gitlab-runner register --non-interactive --executor docker --docker-image alpine:latest --docker-devices "/dev/kvm" --env "VM_ID=$VM_ID"
         gitlab-runner install --user "$CI_USER"
         gitlab-runner start
     else
@@ -44,7 +44,7 @@ if [ ! -f "$READY_FILE" ]; then
         loginctl enable-linger "$CI_USER"
         systemctl -M "$CI_USER@" --user enable --now podman.socket
         sudo -i -u "$CI_USER" CI_SERVER_TOKEN="$CI_SERVER_TOKEN" CI_SERVER_URL="$CI_SERVER_URL" \
-            gitlab-runner register --non-interactive --executor "docker" --docker-image alpine:latest --docker-devices "/dev/kvm" --docker-host "unix:///run/user/$(id -u $CI_USER)/podman/podman.sock"
+            gitlab-runner register --non-interactive --executor "docker" --docker-image alpine:latest --docker-devices "/dev/kvm" --docker-host "unix:///run/user/$(id -u $CI_USER)/podman/podman.sock"  --env "VM_ID=$VM_ID"
         gitlab-runner install --working-directory "/home/$CI_USER" --config "/home/$CI_USER/.gitlab-runner/config.toml" --init-user "$CI_USER"
         gitlab-runner start
     fi
