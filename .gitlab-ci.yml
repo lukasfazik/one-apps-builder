@@ -48,8 +48,10 @@ build-addon-context-job:
     - if: $BUILD_TYPE == "images"
   stage: build-addon-context
   script:
-    - echo "Building context windows"
-    - echo "Building context linux"
+    - make -C one-apps context-iso
+  artifacts:
+    paths:
+      - one-apps/export/one-context.iso
 
 build-images-job:
   rules:
