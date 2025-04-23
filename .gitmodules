@@ -1,4 +1,4 @@
 [submodule "one-apps"]
 	path = one-apps
 	url = git@gitlab.fi.muni.cz:xfazik/one-apps.git
-	branch = master
+	branch = fi
