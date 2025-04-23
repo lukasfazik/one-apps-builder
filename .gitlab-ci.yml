@@ -9,6 +9,23 @@ variables:
         - "one-apps-builder"
         - "images"
 
+.images:
+  variables:
+    INPUT_DIR: "one-apps"
+    OUTPUT_DIR: "one-apps/export"
+    PACKER_HEADLESS: "true"
+  parallel:
+    matrix:
+    - DISTRO_NAME:
+      - windows
+      DISTRO_VER: 
+        - 10
+        - 11
+      DISTRO_EDITION: 
+        - Home
+        - Pro
+        - Education
+
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
@@ -57,21 +74,7 @@ build-images-job:
   rules:
     - if: $BUILD_TYPE == "images"
   stage: build-images
-  variables:
-    INPUT_DIR: "one-apps"
-    OUTPUT_DIR: "one-apps/export"
-    PACKER_HEADLESS: "true"
-  parallel:
-    matrix:
-    - DISTRO_NAME:
-      - windows
-      DISTRO_VER: 
-        - 10
-        - 11
-      DISTRO_EDITION: 
-        - Home
-        - Pro
-        - Education
+  extends: .images
   script:
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
 
