@@ -57,9 +57,23 @@ build-images-job:
   rules:
     - if: $BUILD_TYPE == "images"
   stage: build-images
+  variables:
+    INPUT_DIR: "one-apps"
+    OUTPUT_DIR: "one-apps/export"
+    PACKER_HEADLESS: "true"
+  parallel:
+    matrix:
+    - DISTRO_NAME:
+      - windows
+      DISTRO_VER: 
+        - 10
+        - 11
+      DISTRO_EDITION: 
+        - Home
+        - Pro
+        - Education
   script:
-    - echo "Building images using packer..."
-    - echo "Build complete."
+    - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
 
 deploy-images-job:
   rules:
