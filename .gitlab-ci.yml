@@ -68,6 +68,7 @@ build-addon-context-job:
     - make -C one-apps context-iso
   artifacts:
     paths:
+      - one-apps/context-*/out/*
       - one-apps/export/one-context.iso
 
 build-images-job:
