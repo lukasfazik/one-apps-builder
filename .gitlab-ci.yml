@@ -72,22 +72,13 @@ build-addon-context-job:
       - one-apps/context-*/out/*
       - one-apps/export/one-context.iso
 
-download-virtio-drivers-job:
-  rules:
-    - if: $BUILD_TYPE == "images"
-  stage: download-virtio-drivers
-  script:
-    - curl 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso' -L -o one-apps/packer/windows/iso/virtio-win.iso
-  artifacts:
-    paths:
-      - one-apps/packer/windows/iso/virtio-win.iso
-
 build-images-job:
   rules:
     - if: $BUILD_TYPE == "images"
   stage: build-images
   extends: .images
   script:
+    - curl 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso' -L -o one-apps/packer/windows/iso/virtio-win.iso
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
 
 deploy-images-job:
