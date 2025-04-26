@@ -37,6 +37,7 @@ default:
 stages:
   - build-container
   - build-addon-context
+  - download-virtio-drivers
   - build-images
   - deploy-images
   - delete-images
@@ -70,6 +71,16 @@ build-addon-context-job:
     paths:
       - one-apps/context-*/out/*
       - one-apps/export/one-context.iso
+
+download-virtio-drivers-job:
+  rules:
+    - if: $BUILD_TYPE == "images"
+  stage: download-virtio-drivers
+  script:
+    - curl 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso' -L -o one-apps/packer/windows/iso/virtio-win.iso
+  artifacts:
+    paths:
+      - one-apps/packer/windows/iso/virtio-win.iso
 
 build-images-job:
   rules:
