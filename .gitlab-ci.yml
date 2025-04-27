@@ -95,7 +95,7 @@ download-virtio-drivers-job:
     key: virtio-drivers
     paths:
       - one-apps/packer/windows/iso/virtio-win.iso
-    policy: push-pull
+    policy: pull-push
 
 build-images-job:
   rules:
