@@ -1,13 +1,19 @@
-variables:
-    GIT_SUBMODULE_STRATEGY: recursive
-    GIT_SUBMODULE_FORCE_HTTPS: true
-    IMAGE_NAME: "$CI_REGISTRY_IMAGE/one-apps-builder"
-    BUILD_TYPE:
-      value: "images"
-      description: "Which pipeline to creste (buid one-apps-builder image or build one-apps images)"
+spec:
+  inputs:
+    pipeline_type:
+      description: "Type of pipeline to create"
+      type: string
       options:
         - "one-apps-builder"
         - "images"
+    image_name:
+      description: "Name of the image to build"
+      type: string
+      default: "one-apps-builder"
+
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_SUBMODULE_FORCE_HTTPS: true
 
 .images:
   variables:
@@ -32,7 +38,7 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "web"
 
 default:
-  image: $IMAGE_NAME
+  image: $[[ inputs.image_name ]]
 
 stages:
   - build-container
@@ -44,9 +50,10 @@ stages:
 
 build-container-job:
   rules:
-    - if: $BUILD_TYPE == "one-apps-builder"
+    - if: $[[ inputs.pipeline_type ]] == "one-apps-builder"
   variables:
     GIT_SUBMODULE_PATHS: ":(exclude)one-apps"
+    IMAGE: $CI_REGISTRY_IMAGE/$[[ inputs.image_name ]]
   image:
     name: quay.io/podman/stable
     docker:
@@ -56,9 +63,9 @@ build-container-job:
     - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
   script:
     - echo "Building container..."
-    - podman build -t "$IMAGE_NAME" .
+    - podman build -t "$IMAGE" .
     - echo "Uploading container..."
-    - podman push "$IMAGE_NAME"
+    - podman push "$IMAGE"
 
 
 build-addon-context-job:
