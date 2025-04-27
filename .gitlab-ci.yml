@@ -78,12 +78,10 @@ build-addon-context-job:
   stage: prepare-dependencies
   script:
     - make -C one-apps context-iso
-  cache:
-    key: context-$CI_PIPELINE_ID
+  artifacts:
     paths:
       - one-apps/context-*/out/*
       - one-apps/export/one-context.iso
-    policy: push
 
 download-virtio-drivers-job:
   rules:
