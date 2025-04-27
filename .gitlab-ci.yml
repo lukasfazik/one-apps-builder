@@ -88,12 +88,14 @@ download-virtio-drivers-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
   stage: prepare-dependencies
+  variables:
+    VIRTIO_ISO_PATH: one-apps/packer/windows/iso/virtio-win.iso
   script:
-    - curl 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso' -L -o one-apps/packer/windows/iso/virtio-win.iso
+    - curl -L -R -o "$VIRTIO_ISO_PATH" --time-cond "$VIRTIO_ISO_PATH" 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso'
   cache:
-    key: $CI_PIPELINE_ID
+    key: virtio-drivers
     paths:
-      - one-apps/packer/windows/iso/virtio-win.iso
+      - "$VIRTIO_ISO_PATH"
 
 build-images-job:
   rules:
@@ -101,9 +103,8 @@ build-images-job:
   stage: build-images
   extends: .images
   cache:
-    key: $CI_PIPELINE_ID
-    paths:
-      - one-apps/packer/windows/iso/virtio-win.iso
+    - key: $CI_PIPELINE_ID
+    - key: virtio-drivers
   script:
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
 
