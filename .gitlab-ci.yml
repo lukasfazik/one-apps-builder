@@ -104,7 +104,6 @@ build-images-job:
     paths:
       - one-apps/packer/windows/iso/virtio-win.iso
   script:
-    - test $DISTRO_NAME = "windows" && curl 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso' -L -o one-apps/packer/windows/iso/virtio-win.iso
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
 
 deploy-images-job:
