@@ -1,19 +1,21 @@
 spec:
   inputs:
-    pipeline_type:
-      description: "Type of pipeline to create"
-      type: string
-      options:
-        - "one-apps-builder"
-        - "images"
     image_name:
       description: "Name of the image to build"
       type: string
       default: "one-apps-builder"
 
+---
+
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
     GIT_SUBMODULE_FORCE_HTTPS: true
+    BUILD_TYPE:
+      value: "images"
+      description: "Which pipeline to creste (buid one-apps-builder image or build one-apps images)"
+      options:
+        - "one-apps-builder"
+        - "images"
 
 .images:
   variables:
@@ -50,7 +52,7 @@ stages:
 
 build-container-job:
   rules:
-    - if: $[[ inputs.pipeline_type ]] == "one-apps-builder"
+    - if: $BUILD_TYPE == "one-apps-builder"
   variables:
     GIT_SUBMODULE_PATHS: ":(exclude)one-apps"
     IMAGE: $CI_REGISTRY_IMAGE/$[[ inputs.image_name ]]
