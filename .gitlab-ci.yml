@@ -30,7 +30,7 @@ variables:
     GIT_SUBMODULE_FORCE_HTTPS: true
     
 default:
-  image: $[[ inputs.image_name ]]
+  image: $CI_REGISTRY_IMAGE/$[[ inputs.image_name ]]
 
 stages:
   - build-container
