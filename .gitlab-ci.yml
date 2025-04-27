@@ -17,6 +17,22 @@ variables:
         - "one-apps-builder"
         - "images"
 
+default:
+  image: $[[ inputs.image_name ]]
+
+stages:
+  - build-container
+  - build-addon-context
+  - download-virtio-drivers
+  - build-images
+  - deploy-images
+  - delete-images
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+
 .images:
   variables:
     INPUT_DIR: "one-apps"
@@ -33,22 +49,6 @@ variables:
         - Home
         - Pro
         - Education
-
-workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-    - if: $CI_PIPELINE_SOURCE == "web"
-
-default:
-  image: $[[ inputs.image_name ]]
-
-stages:
-  - build-container
-  - build-addon-context
-  - download-virtio-drivers
-  - build-images
-  - deploy-images
-  - delete-images
 
 build-container-job:
   rules:
@@ -68,7 +68,6 @@ build-container-job:
     - podman build -t "$IMAGE" .
     - echo "Uploading container..."
     - podman push "$IMAGE"
-
 
 build-addon-context-job:
   rules:
