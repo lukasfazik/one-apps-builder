@@ -35,6 +35,7 @@ default:
 stages:
   - build-container
   - build-addon-context
+  - download-virtio-drivers
   - build-images
   - deploy-images
   - delete-images
@@ -83,13 +84,28 @@ build-addon-context-job:
       - one-apps/context-*/out/*
       - one-apps/export/one-context.iso
 
+download-virtio-drivers-job:
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
+  stage: download-virtio-drivers
+  script:
+    - curl 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso' -L -o one-apps/packer/windows/iso/virtio-win.iso
+  cache:
+    key: $CI_PIPELINE_ID
+    paths:
+      - one-apps/packer/windows/iso/virtio-win.iso
+
 build-images-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: build-images
   extends: .images
+  cache:
+    key: $CI_PIPELINE_ID
+    paths:
+      - one-apps/packer/windows/iso/virtio-win.iso
   script:
-    - curl 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso' -L -o one-apps/packer/windows/iso/virtio-win.iso
+    - test $DISTRO_NAME = "windows" && curl 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso' -L -o one-apps/packer/windows/iso/virtio-win.iso
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
 
 deploy-images-job:
