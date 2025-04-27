@@ -14,15 +14,15 @@ spec:
     distro_name:
       description: "Name of the distribution"
       type: string
-      default: "windows"
+      default: ""
     distro_versions:
       description: "Versions of the distribution"
       type: array
-      default: ["10"]
+      default: []
     distro_editions:
       description: "Editions of the distribution"
       type: array
-      default: ["Home", "Pro", "Education"]
+      default: []
 ---
 
 variables:
