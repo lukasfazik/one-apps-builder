@@ -18,11 +18,11 @@ spec:
     distro_versions:
       description: "Versions of the distribution"
       type: array
-      default: []
+      default: [""]
     distro_editions:
       description: "Editions of the distribution"
       type: array
-      default: []
+      default: [""]
 ---
 
 variables:
