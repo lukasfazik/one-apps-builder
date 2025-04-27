@@ -4,19 +4,19 @@ spec:
       description: "Name of the image to build"
       type: string
       default: "one-apps-builder"
-
+    pipeline_type:
+      description: "Type of pipeline to run"
+      type: string
+      default: "images"
+      options:
+        - "images"
+        - "one-apps-builder"
 ---
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
     GIT_SUBMODULE_FORCE_HTTPS: true
-    BUILD_TYPE:
-      value: "images"
-      description: "Which pipeline to creste (buid one-apps-builder image or build one-apps images)"
-      options:
-        - "one-apps-builder"
-        - "images"
-
+    
 default:
   image: $[[ inputs.image_name ]]
 
@@ -52,7 +52,7 @@ workflow:
 
 build-container-job:
   rules:
-    - if: $BUILD_TYPE == "one-apps-builder"
+    - if: '"$[[ inputs.pipeline_type ]]" == "one-apps-builder"'
   variables:
     GIT_SUBMODULE_PATHS: ":(exclude)one-apps"
     IMAGE: $CI_REGISTRY_IMAGE/$[[ inputs.image_name ]]
@@ -71,7 +71,7 @@ build-container-job:
 
 build-addon-context-job:
   rules:
-    - if: $BUILD_TYPE == "images"
+    - if: '"$[[ inputs.pipeline_type ]]" == "images"'
   stage: build-addon-context
   script:
     - make -C one-apps context-iso
@@ -82,7 +82,7 @@ build-addon-context-job:
 
 build-images-job:
   rules:
-    - if: $BUILD_TYPE == "images"
+    - if: '"$[[ inputs.pipeline_type ]]" == "images"'
   stage: build-images
   extends: .images
   script:
@@ -91,7 +91,7 @@ build-images-job:
 
 deploy-images-job:
   rules:
-    - if: $BUILD_TYPE == "images"
+    - if: '"$[[ inputs.pipeline_type ]]" == "images"'
   stage: deploy-images
   script:
     - echo "Deploying images to Stratus FI..."
@@ -99,7 +99,7 @@ deploy-images-job:
 
 delete-images-job:
   rules:
-    - if: $BUILD_TYPE == "images"
+    - if: '"$[[ inputs.pipeline_type ]]" == "images"'
   stage: delete-images
   script:
     - echo "Removing VM template..."
