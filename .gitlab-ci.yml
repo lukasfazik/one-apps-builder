@@ -34,8 +34,7 @@ default:
 
 stages:
   - build-container
-  - build-addon-context
-  - download-virtio-drivers
+  - prepare-dependencies
   - build-images
   - deploy-images
   - delete-images
@@ -76,7 +75,7 @@ build-container-job:
 build-addon-context-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
-  stage: build-addon-context
+  stage: prepare-dependencies
   script:
     - make -C one-apps context-iso
   artifacts:
@@ -87,7 +86,7 @@ build-addon-context-job:
 download-virtio-drivers-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
-  stage: download-virtio-drivers
+  stage: prepare-dependencies
   script:
     - curl 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso' -L -o one-apps/packer/windows/iso/virtio-win.iso
   cache:
