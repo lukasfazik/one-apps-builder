@@ -11,6 +11,18 @@ spec:
       options:
         - "build-images"
         - "build-containers"
+    distro_name:
+      description: "Name of the distribution"
+      type: string
+      default: "windows"
+    distro_versions:
+      description: "Versions of the distribution"
+      type: array
+      default: ["10"]
+    distro_editions:
+      description: "Editions of the distribution"
+      type: array
+      default: ["Home", "Pro", "Education"]
 ---
 
 variables:
@@ -40,15 +52,9 @@ workflow:
     PACKER_HEADLESS: "true"
   parallel:
     matrix:
-    - DISTRO_NAME:
-      - windows
-      DISTRO_VER: 
-        - 10
-        - 11
-      DISTRO_EDITION: 
-        - Home
-        - Pro
-        - Education
+    - DISTRO_NAME: $[[ inputs.distro_name ]]
+      DISTRO_VER: $[[ inputs.distro_versions ]]
+      DISTRO_EDITION: $[[ inputs.distro_editions ]]
 
 build-container-job:
   rules:
