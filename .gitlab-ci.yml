@@ -35,7 +35,6 @@ default:
 stages:
   - build-container
   - build-addon-context
-  - download-virtio-drivers
   - build-images
   - deploy-images
   - delete-images
