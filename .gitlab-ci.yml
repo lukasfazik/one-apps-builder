@@ -79,7 +79,7 @@ build-addon-context-job:
   script:
     - make -C one-apps context-iso
   cache:
-    key: $CI_PIPELINE_ID
+    key: context-$CI_PIPELINE_ID
     paths:
       - one-apps/context-*/out/*
       - one-apps/export/one-context.iso
@@ -103,8 +103,13 @@ build-images-job:
   stage: build-images
   extends: .images
   cache:
-    - key: $CI_PIPELINE_ID
+    - key: context-$CI_PIPELINE_ID
+      paths:
+        - one-apps/context-*/out/*
+        - one-apps/export/one-context.iso 
     - key: virtio-drivers
+      paths:
+        - one-apps/packer/windows/iso/virtio-win.iso
   script:
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
 
