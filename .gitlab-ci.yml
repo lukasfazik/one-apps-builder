@@ -83,6 +83,7 @@ build-addon-context-job:
     paths:
       - one-apps/context-*/out/*
       - one-apps/export/one-context.iso
+    policy: push
 
 download-virtio-drivers-job:
   rules:
@@ -95,7 +96,8 @@ download-virtio-drivers-job:
   cache:
     key: virtio-drivers
     paths:
-      - "$VIRTIO_ISO_PATH"
+      - one-apps/packer/windows/iso/virtio-win.iso
+    policy: push
 
 build-images-job:
   rules:
@@ -107,9 +109,11 @@ build-images-job:
       paths:
         - one-apps/context-*/out/*
         - one-apps/export/one-context.iso 
+      policy: pull
     - key: virtio-drivers
       paths:
         - one-apps/packer/windows/iso/virtio-win.iso
+      policy: pull
   script:
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
 
