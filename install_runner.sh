@@ -38,8 +38,8 @@ if [ ! -f "$READY_FILE" ]; then
     # Stop and remove the default service
     sudo gitlab-runner stop
     sudo gitlab-runner uninstall
-    # Add user to the KVM group
-    sudo adduser "$CI_USER" kvm 
+    # Set /dev/kvm permissions 
+    sudo chmod 666 /dev/kvm
     # Prepare the user
     sudo apt-get install -y uidmap
     sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 "$CI_USER"
@@ -55,7 +55,7 @@ if [ ! -f "$READY_FILE" ]; then
     fi
     # Configure the runner
     sudo -i -u "$CI_USER" DOCKER_HOST="$DOCKER_HOST" CI_SERVER_TOKEN="$CI_SERVER_TOKEN" CI_SERVER_URL="$CI_SERVER_URL" \
-            gitlab-runner register --non-interactive --executor "docker" --docker-image alpine:latest --docker-devices "/dev/kvm"  --env "VM_ID=$VM_ID" --docker-group-add "keep-groups"
+            gitlab-runner register --non-interactive --executor "docker" --docker-image alpine:latest --docker-devices "/dev/kvm"  --env "VM_ID=$VM_ID"
     sudo gitlab-runner install --working-directory "/home/$CI_USER" --config "/home/$CI_USER/.gitlab-runner/config.toml" --init-user "$CI_USER"
     # restart the server in one minute
     sudo shutdown -r +1
