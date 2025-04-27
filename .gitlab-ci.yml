@@ -78,7 +78,8 @@ build-addon-context-job:
   stage: prepare-dependencies
   script:
     - make -C one-apps context-iso
-  artifacts:
+  cache:
+    key: $CI_PIPELINE_ID
     paths:
       - one-apps/context-*/out/*
       - one-apps/export/one-context.iso
