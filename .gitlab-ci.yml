@@ -70,9 +70,7 @@ build-container-job:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
   script:
-    - echo "Building container..."
     - podman build -t "$IMAGE" .
-    - echo "Uploading container..."
     - podman push "$IMAGE"
 
 build-addon-context-job:
