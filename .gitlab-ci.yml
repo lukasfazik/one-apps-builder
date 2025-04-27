@@ -7,10 +7,10 @@ spec:
     pipeline_type:
       description: "Type of pipeline to run"
       type: string
-      default: "images"
+      default: "build-images"
       options:
-        - "images"
-        - "one-apps-builder"
+        - "build-images"
+        - "build-containers"
 ---
 
 variables:
@@ -52,7 +52,7 @@ workflow:
 
 build-container-job:
   rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "one-apps-builder"'
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
   variables:
     GIT_SUBMODULE_PATHS: ":(exclude)one-apps"
     IMAGE: $CI_REGISTRY_IMAGE/$[[ inputs.image_name ]]
@@ -71,7 +71,7 @@ build-container-job:
 
 build-addon-context-job:
   rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "images"'
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: build-addon-context
   script:
     - make -C one-apps context-iso
@@ -82,7 +82,7 @@ build-addon-context-job:
 
 build-images-job:
   rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "images"'
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: build-images
   extends: .images
   script:
@@ -91,7 +91,7 @@ build-images-job:
 
 deploy-images-job:
   rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "images"'
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: deploy-images
   script:
     - echo "Deploying images to Stratus FI..."
@@ -99,7 +99,7 @@ deploy-images-job:
 
 delete-images-job:
   rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "images"'
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: delete-images
   script:
     - echo "Removing VM template..."
