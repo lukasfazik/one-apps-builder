@@ -121,9 +121,6 @@ download-virtio-drivers-job:
     policy: pull-push
 
 build-images-job:
-  needs: 
-    - build-addon-context-job
-    - download-virtio-drivers-job
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: build-images
