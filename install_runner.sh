@@ -57,6 +57,8 @@ if [ ! -f "$READY_FILE" ]; then
     sudo -i -u "$CI_USER" DOCKER_HOST="$DOCKER_HOST" CI_SERVER_TOKEN="$CI_SERVER_TOKEN" CI_SERVER_URL="$CI_SERVER_URL" \
             gitlab-runner register --non-interactive --executor "docker" --docker-image alpine:latest --docker-devices "/dev/kvm"  --env "VM_ID=$VM_ID"
     sudo gitlab-runner install --working-directory "/home/$CI_USER" --config "/home/$CI_USER/.gitlab-runner/config.toml" --init-user "$CI_USER"
+    # Reset the runner token because original token is visible in the VM configuration
+    sudo -i -u "$CI_USER" gitlab-runner reset-token --all-runners
     # restart the server in one minute
     sudo shutdown -r +1
 fi
