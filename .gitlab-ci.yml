@@ -84,6 +84,9 @@ build-addon-context-job:
       - one-apps/export/one-context.iso
 
 download-virtio-drivers-job:
+  image:
+    name: quay.io/curl/curl:latest
+    entrypoint: [""]
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
   stage: prepare-dependencies
