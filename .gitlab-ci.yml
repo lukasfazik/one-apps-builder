@@ -96,10 +96,12 @@ build-addon-context-job:
   stage: prepare-dependencies
   script:
     - make -C one-apps context-iso
-  artifacts:
+  cache:
+    key: addon-context-cache
     paths:
       - one-apps/context-*/out/*
       - one-apps/export/one-context.iso
+    policy: push
 
 download-virtio-drivers-job:
   image:
@@ -113,7 +115,7 @@ download-virtio-drivers-job:
   script:
     - curl -L -R -o "$VIRTIO_ISO_PATH" --time-cond "$VIRTIO_ISO_PATH" 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso'
   cache:
-    key: virtio-drivers
+    key: virtio-drivers-cache
     paths:
       - one-apps/packer/windows/iso/virtio-win.iso
     policy: pull-push
@@ -127,12 +129,12 @@ build-images-job:
   stage: build-images
   extends: .images
   cache:
-    - key: context-$CI_PIPELINE_ID
+    - key: addon-context-cache
       paths:
         - one-apps/context-*/out/*
         - one-apps/export/one-context.iso 
       policy: pull
-    - key: virtio-drivers
+    - key: virtio-drivers-cache
       paths:
         - one-apps/packer/windows/iso/virtio-win.iso
       policy: pull
