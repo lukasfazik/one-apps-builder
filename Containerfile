@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     gnupg curl git make ruby wixl msitools \
     dpkg rpm genisoimage cloud-utils qemu-utils \
     qemu-system guestfs-tools lsb-release && \
-    gem install fpm
+    gem install --no-document fpm
 # Install packer
 RUN curl -s https://apt.releases.hashicorp.com/gpg | \
     gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg && \
