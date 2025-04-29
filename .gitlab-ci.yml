@@ -1,9 +1,5 @@
 spec:
   inputs:
-    image_name:
-      description: "Name of the image to build"
-      type: string
-      default: "one-apps-builder"
     pipeline_type:
       description: "Type of pipeline to run"
       type: string
@@ -30,7 +26,7 @@ variables:
     GIT_SUBMODULE_FORCE_HTTPS: true
     
 default:
-  image: $CI_REGISTRY_IMAGE/$[[ inputs.image_name ]]
+  image: $CI_REGISTRY_IMAGE/one-apps-builder
 
 stages:
   - build-containers
@@ -60,7 +56,7 @@ build-one-apps-builder-job:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
   variables:
     GIT_SUBMODULE_PATHS: ":(exclude)one-apps"
-    IMAGE: $CI_REGISTRY_IMAGE/$[[ inputs.image_name ]]
+    IMAGE: $CI_REGISTRY_IMAGE/one-apps-builder
   image:
     name: quay.io/podman/stable
     docker:
