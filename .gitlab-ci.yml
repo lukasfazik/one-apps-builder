@@ -65,7 +65,7 @@ build-one-apps-builder-job:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
   script:
-    - podman build -t "$IMAGE" .
+    - podman build -t "$IMAGE" -f Containerfile
     - podman push "$IMAGE"
 
 build-context-builder-job:
@@ -82,7 +82,7 @@ build-context-builder-job:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
   script:
-    - podman build -t "$IMAGE" -f context-builder.dockerfile .
+    - podman build -t "$IMAGE" -f context-builder.dockerfile
     - podman push "$IMAGE"
 
 build-addon-context-job:
