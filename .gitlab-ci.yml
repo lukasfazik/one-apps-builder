@@ -135,6 +135,10 @@ build-images-job:
       paths:
         - one-apps/packer/windows/iso/virtio-win.iso
       policy: pull
+    - key: images-cache
+      paths:
+        - one-apps/export/*.qcow2
+      policy: push
   script:
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
 
@@ -142,6 +146,11 @@ deploy-images-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: deploy-images
+  cache:
+    key: images-cache
+    paths:
+      - one-apps/export/*.qcow2
+    policy: pull
   script:
     - echo "Deploying images to Stratus FI..."
     - echo "Images successfully deployed."
