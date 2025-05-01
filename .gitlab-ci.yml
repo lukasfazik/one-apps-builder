@@ -23,6 +23,7 @@ spec:
 
 variables:
     GIT_SUBMODULE_FORCE_HTTPS: true
+    GIT_SUBMODULE_STRATEGY: normal
     
 default:
   image: $CI_REGISTRY_IMAGE/one-apps-builder
@@ -54,7 +55,6 @@ build-one-apps-builder-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
   variables:
-    GIT_SUBMODULE_PATHS: ":(exclude)one-apps"
     IMAGE: $CI_REGISTRY_IMAGE/one-apps-builder
   image:
     name: quay.io/podman/stable
@@ -71,7 +71,6 @@ build-context-builder-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
   variables:
-    GIT_SUBMODULE_PATHS: ":(exclude)one-apps"
     IMAGE: $CI_REGISTRY_IMAGE/context-builder
   image:
     name: quay.io/podman/stable
@@ -86,6 +85,8 @@ build-context-builder-job:
 
 build-addon-context-job:
   image: $CI_REGISTRY_IMAGE/context-builder
+  variables:
+    GIT_SUBMODULE_PATHS: one-apps
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: prepare-dependencies
@@ -134,6 +135,8 @@ build-images-job:
       paths:
         - one-apps/export/*.qcow2
       policy: push
+  variables:
+    GIT_SUBMODULE_PATHS: one-apps
   script:
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
 
