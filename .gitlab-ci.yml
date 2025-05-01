@@ -150,8 +150,7 @@ deploy-images-job:
       - one-apps/export/*.qcow2
     policy: pull
   script:
-    - echo "Deploying images to Stratus FI..."
-    - echo "Images successfully deployed."
+    - ls -la one-apps/export/
 
 delete-images-job:
   rules:
