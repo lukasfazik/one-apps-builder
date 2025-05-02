@@ -97,7 +97,7 @@ build-addon-context-job:
     key: addon-context-cache
     paths:
       - one-apps/context-*/out/*
-      - one-apps/export/one-context.iso
+      - "$DIR_EXPORT/one-context.iso"
     policy: push
 
 download-virtio-drivers-job:
@@ -126,7 +126,7 @@ build-images-job:
     - key: addon-context-cache
       paths:
         - one-apps/context-*/out/*
-        - one-apps/export/one-context.iso 
+        - "$DIR_EXPORT/one-context.iso"
       policy: pull
     - key: virtio-drivers-cache
       paths:
