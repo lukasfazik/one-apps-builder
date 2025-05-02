@@ -24,7 +24,9 @@ spec:
 variables:
     GIT_SUBMODULE_FORCE_HTTPS: true
     GIT_SUBMODULE_STRATEGY: normal
-    
+    DIR_EXPORT: /export/$CI_PIPELINE_ID/export
+    DIR_BUILD: /export/$CI_PIPELINE_ID/build
+
 default:
   image: $CI_REGISTRY_IMAGE/one-apps-builder
 
@@ -87,7 +89,6 @@ build-addon-context-job:
   image: $CI_REGISTRY_IMAGE/context-builder
   variables:
     GIT_SUBMODULE_PATHS: one-apps
-    DIR_EXPORT: /export
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: prepare-dependencies
@@ -134,9 +135,8 @@ build-images-job:
       policy: pull
   variables:
     GIT_SUBMODULE_PATHS: one-apps
-    DIR_EXPORT: /export
   script:
-    - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}" DIR_EXPORT="$DIR_EXPORT"
+    - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}" DIR_EXPORT="$DIR_EXPORT" DIR_BUILD="$DIR_BUILD"
 
 deploy-images-job:
   rules:
@@ -147,8 +147,6 @@ deploy-images-job:
     paths:
       - one-apps/export/*.qcow2
     policy: pull
-  variables:
-    DIR_EXPORT: /export
   script:
     - ls -la "$DIR_EXPORT"
 
