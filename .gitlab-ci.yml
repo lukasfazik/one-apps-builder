@@ -87,11 +87,12 @@ build-addon-context-job:
   image: $CI_REGISTRY_IMAGE/context-builder
   variables:
     GIT_SUBMODULE_PATHS: one-apps
+    DIR_EXPORT: /export
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: prepare-dependencies
   script:
-    - make -C one-apps context-iso
+    - make -C one-apps context-iso DIR_EXPORT="$DIR_EXPORT"
   cache:
     key: addon-context-cache
     paths:
@@ -131,14 +132,11 @@ build-images-job:
       paths:
         - one-apps/packer/windows/iso/virtio-win.iso
       policy: pull
-    - key: images-cache
-      paths:
-        - one-apps/export/*.qcow2
-      policy: push
   variables:
     GIT_SUBMODULE_PATHS: one-apps
+    DIR_EXPORT: /export
   script:
-    - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}"
+    - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}" DIR_EXPORT="$DIR_EXPORT"
 
 deploy-images-job:
   rules:
@@ -149,8 +147,10 @@ deploy-images-job:
     paths:
       - one-apps/export/*.qcow2
     policy: pull
+  variables:
+    DIR_EXPORT: /export
   script:
-    - ls -la one-apps/export/
+    - ls -la "$DIR_EXPORT"
 
 delete-images-job:
   rules:
