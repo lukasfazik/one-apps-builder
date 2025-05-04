@@ -19,6 +19,10 @@ spec:
       description: "Editions of the distribution"
       type: array
       default: [""]
+    remove_images:
+      description: "Remove images after deployment"
+      type: boolean
+      default: true
 ---
 
 variables:
@@ -145,7 +149,7 @@ deploy-images-job:
   extends: .images
   script:
     - ls -la "$DIR_EXPORT/${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}.*"
-    - rm -f "$DIR_EXPORT/${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}.*"
+    - if $[[ inputs.remove_images ]]; then rm -f "$DIR_EXPORT/${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}.*"; fi
 
 delete-images-job:
   rules:
