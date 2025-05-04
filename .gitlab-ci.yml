@@ -142,11 +142,6 @@ deploy-images-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: deploy-images
-  cache:
-    key: images-cache
-    paths:
-      - one-apps/export/*.qcow2
-    policy: pull
   script:
     - ls -la "$DIR_EXPORT"
 
