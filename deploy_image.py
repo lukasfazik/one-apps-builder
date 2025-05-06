@@ -17,7 +17,7 @@ if __name__ == "__main__":
     CI_JOB_ID = os.environ.get("CI_JOB_ID", "")
     CI_COMMIT_SHA = os.environ.get("CI_COMMIT_SHA", "")
     DISTRO_NAME = os.environ.get("DISTRO_NAME", "")
-    DISTRO_VERSION = os.environ.get("DISTRO_VERSION", "")
+    DISTRO_VER = os.environ.get("DISTRO_VER", "")
     DISTRO_EDITION = os.environ.get("DISTRO_EDITION", "")
     IMAGE_NAME_PREFIX = os.environ.get("IMAGE_NAME_PREFIX", "")
     IMAGE_NAME_SUFFIX = os.environ.get("IMAGE_NAME_SUFFIX", "")
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     VM_TEMPLATE_PATH = os.environ.get("VM_TEMPLATE_PATH", "template.tmpl")
     # Initialize image names
     image_names = ImageNames(IMAGE_NAME_PREFIX, ARCHITECTURE, LANGUAGE, IMAGE_NAME_SUFFIX)
-    image_name = DISTRO_NAME + DISTRO_VERSION + DISTRO_EDITION
+    image_name = DISTRO_NAME + DISTRO_VER + DISTRO_EDITION
     image_long_name = image_names.get_image_name(image_name)
     # Read credentials from ONE_AUTH file
     try:
