@@ -39,7 +39,7 @@ if [ ! -f "$READY_FILE" ]; then
     sudo gitlab-runner stop
     sudo gitlab-runner uninstall
     # Set /dev/kvm permissions via udev rule (applies after reboot)
-    sudo echo 'KERNEL=="kvm", MODE="0666"' > /etc/udev/rules.d/99-kvm.rules
+    sudo echo 'KERNEL=="kvm", MODE="0666"' > /etc/udev/rules.d/99-gitlab-runner-kvm.rules
     # Prepare the user
     sudo apt-get install -y uidmap
     sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 "$CI_USER"
