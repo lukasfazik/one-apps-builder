@@ -24,6 +24,7 @@ if __name__ == "__main__":
     ARCHITECTURE = os.environ.get("ARCHITECTURE", "x64")
     LANGUAGE = os.environ.get("LANGUAGE", "en-US")
     VM_TEMPLATE_PATH = os.environ.get("VM_TEMPLATE_PATH", "template.tmpl")
+    DIR_EXPORT = os.environ.get("DIR_EXPORT", ".")
     # Initialize image names
     image_names = ImageNames(IMAGE_NAME_PREFIX, ARCHITECTURE, LANGUAGE, IMAGE_NAME_SUFFIX)
     image_name = DISTRO_NAME + DISTRO_VER + DISTRO_EDITION
@@ -40,7 +41,7 @@ if __name__ == "__main__":
         print(f"Error: ONE_AUTH file not found at {ONE_AUTH}")
         exit(1)
     # get QEMU image size
-    image_path = os.path.join(image_name + ".qcow2")
+    image_path = os.path.join(DIR_EXPORT, image_name + ".qcow2")
     image_size_mb = get_qemu_image_size_mb(image_path)
     if (image_size_mb == -1):
         exit(1)
