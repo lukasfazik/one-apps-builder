@@ -48,8 +48,10 @@ class One:
             return ImageState(image.STATE)
         return None
 
-    def create_image(self, datastore: int, image_name: str, image_description: Optional[str] = None, image_path: Optional[str] = None, image_type: ImageType = ImageType.DATABLOCK, image_dev_prefix: Optional[ImageDevPrefix] = None, image_format: ImageFormat = ImageFormat.RAW, image_size_mb: Optional[int] = None, persistent_image: bool = False) -> int:
+    def create_image(self, datastore: int, image_name: str, image_description: Optional[str] = None, image_path: Optional[str] = None, image_type: ImageType = ImageType.DATABLOCK, image_dev_prefix: Optional[ImageDevPrefix] = None, image_format: ImageFormat = ImageFormat.RAW, image_size_mb: Optional[int] = None, persistent_image: bool = False, **kwargs) -> int:
         image_template: List[str] = []
+        image_template.append(f'NAME = "{image_name}"')
+        image_template.append(f'TYPE = "{image_type.value}"')
         image_template.append(f'FORMAT = "{image_format.value}"')
         if image_dev_prefix is not None:
             image_template.append(f'DEV_PREFIX = "{image_dev_prefix.value}"')
@@ -61,10 +63,11 @@ class One:
             image_template.append('PERSISTENT = "YES"')
         else:
             image_template.append('PERSISTENT = "NO"')
-        image_template.append(f'NAME = "{image_name}"')
-        image_template.append(f'DESCRIPTION = "{image_description}"')
-        image_template.append(f'TYPE = "{image_type.value}"')
-        
+        if image_description:
+            image_template.append(f'DESCRIPTION = "{image_description}"')
+        for key, value in kwargs.items():
+            image_template.append(f'{key} = "{value}"')
+
         image_definition = "\n".join(image_template)
         try:
             return self._one.image.allocate(image_definition, datastore)
@@ -77,6 +80,12 @@ class One:
             return self._one.image.delete(id)
         except pyone.OneException as e:
             print(f"Error deleting image: {str(e)}")
+            return -1
+    def set_image_persiency(self, id: int, persistent: bool) -> int:
+        try:
+            return self._one.image.persistent(id, persistent)
+        except pyone.OneException as e:
+            print(f"Error setting image persisting state: {str(e)}")
             return -1
 
     def get_vm_template(self, id: int) -> Optional[pyone.bindings.TEMPLATETypeSub]:
@@ -137,12 +146,15 @@ class One:
             return -1
 
     def get_vm_image_target(self, vm_id: int, image_id: int) -> Optional[str]:
+        """
+        Get the target of the first matching disk image attached to the VM based on the image_id
+        """
         vm = self.get_vm(vm_id)
         if vm is None:
             return None
         disks = self.get_vm_disks(vm)
         for disk in disks:
-            if disk.geT("IMAGE_ID") == str(image_id):
+            if disk.get("IMAGE_ID") == str(image_id):
                 return disk.get("TARGET", None)
         return None
 

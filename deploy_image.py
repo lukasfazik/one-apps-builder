@@ -1,39 +1,33 @@
 #!/usr/bin/env python3
-
 import os
 from image_names import ImageNames
+from utils import detach_image_by_id, calculate_disk_location
 from one import One, ImageType, ImageDevPrefix, ImageFormat
 from states import VMLCMState, ImageState
+from qemu import get_qemu_image_size_mb, convert_image_format
 
-def detach_image_by_id(one: One, vm_id: int, image_id: int) -> bool:
-    """
-    Detaches all images from the VM that have the corresponding ID
-    """
-    vm = one.get_vm(vm_id)
-    if vm is None:
-        print(f"VM with ID {vm_id} not found.")
-        return False
-    
-    for disk in one.get_vm_disks(vm):
-        if (vm_image_id := disk.get("IMAGE_ID")) and image_id == int(vm_image_id):
-            disk_id = int(disk.get("DISK_ID"))
-            one.wait_for_vm_state(vm_id, VMLCMState.RUNNING)
-            one.detach_vm_image(vm_id, disk_id)
-            print(f"Image ({image_id}) DISK_ID: ({disk_id}) detached from VM ({vm_id})")
-            
-    return True
 
 if __name__ == "__main__":
-    # Set up environment variables
+    # Set up environment variables and determine image name
     ONE_XMLRPC = os.environ.get("ONE_XMLRPC", "http://localhost:2633/RPC2")
     ONE_AUTH = os.environ.get("ONE_AUTH", "~/.one/one_auth")
-    VM_ID = os.environ.get("VM_ID")
+    IMAGE_DATASTORE_ID: int = int(os.environ.get("IMAGE_DATASTORE_ID", "-1"))
+    VM_ID: int = int(os.environ.get("VM_ID", "-1"))
     CI_PIPELINE_ID = os.environ.get("CI_PIPELINE_ID", "")
+    CI_JOB_ID = os.environ.get("CI_JOB_ID", "")
+    CI_COMMIT_SHA = os.environ.get("CI_COMMIT_SHA", "")
     DISTRO_NAME = os.environ.get("DISTRO_NAME", "")
     DISTRO_VERSION = os.environ.get("DISTRO_VERSION", "")
     DISTRO_EDITION = os.environ.get("DISTRO_EDITION", "")
-    IMAGE_NAME = DISTRO_NAME + DISTRO_VERSION + DISTRO_EDITION
-    IMAGE_NAME = "windows10Home"
+    IMAGE_NAME_PREFIX = os.environ.get("IMAGE_NAME_PREFIX", "")
+    IMAGE_NAME_SUFFIX = os.environ.get("IMAGE_NAME_SUFFIX", "")
+    ARCHITECTURE = os.environ.get("ARCHITECTURE", "x64")
+    LANGUAGE = os.environ.get("LANGUAGE", "en-US")
+    VM_TEMPLATE_PATH = os.environ.get("VM_TEMPLATE_PATH", "template.tmpl")
+    # Initialize image names
+    image_names = ImageNames(IMAGE_NAME_PREFIX, ARCHITECTURE, LANGUAGE, IMAGE_NAME_SUFFIX)
+    image_name = DISTRO_NAME + DISTRO_VERSION + DISTRO_EDITION
+    image_long_name = image_names.get_image_name(image_name)
     # Read credentials from ONE_AUTH file
     try:
         with open(os.path.expanduser(ONE_AUTH), "r") as f:
@@ -45,29 +39,55 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print(f"Error: ONE_AUTH file not found at {ONE_AUTH}")
         exit(1)
+    # get QEMU image size
+    image_path = os.path.join(image_name + ".qcow2")
+    image_size_mb = get_qemu_image_size_mb(image_path)
+    if (image_size_mb == -1):
+        exit(1)
     # Inicialize OpenNebula connection
     one = One(url=ONE_XMLRPC, username=username, password=password)
-    vm_id = 12205
+    # Create image
     image_id = one.create_image(
-        datastore=100,
-        image_name="TEST2",
-        image_description="Test image",
-        image_type=ImageType.DATABLOCK,
-        image_dev_prefix=ImageDevPrefix.VD,
+        datastore=IMAGE_DATASTORE_ID,
+        image_name=image_long_name,
+        image_type=ImageType.OS,
+        image_dev_prefix=ImageDevPrefix.SD,
         image_format=ImageFormat.RAW,
-        image_size_mb=1024,
-        persistent_image=False
+        image_size_mb=image_size_mb,
+        persistent_image=True,
+        CI_PIPELINE_ID=CI_PIPELINE_ID,
+        CI_JOB_ID=CI_JOB_ID,
+        CI_COMMIT_SHA=CI_COMMIT_SHA
     )
-    print(f"Image created with ID: {image_id}")
+    if (image_id == -1):
+        exit(1)
+    # Wait for the image to be ready
     one.wait_for_image_state(image_id, ImageState.READY)
-    for i in range(1):
-        one.wait_for_vm_state(vm_id, VMLCMState.RUNNING)
-        one.attach_vm_image(vm_id=vm_id, image_id=image_id, target="vdl")
-        print(f"Image ({image_id}) attached to VM ({vm_id})")
-        
+    # Attach the image to the VM
+    one.attach_vm_image(vm_id=VM_ID, image_id=image_id, dev_prefix=ImageDevPrefix.SD)
+    # Wait for the VM to be in the RUNNING state
+    one.wait_for_vm_state(VM_ID, VMLCMState.RUNNING)
+    # get the TAGRET of the image
+    image_target = one.get_vm_image_target(VM_ID, image_id)
+    # get the attached block device
+    disk_location = calculate_disk_location(image_target)
+    block_device_path = f"/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0-0-{disk_location}-0"
+    # Write the image to the block device
+    # convert_image_format(image_path, block_device_path, "raw")
     # Detach the image from the VM
-    detach_image_by_id(one, vm_id, image_id)
-    
-    one.wait_for_image_state(image_id, ImageState.READY)
-    one.delete_image(image_id)
-    print(f"Image ({image_id}) deleted")
+    detach_image_by_id(one, VM_ID, image_id)
+    # Wait for the VM to be in the RUNNING state
+    one.wait_for_vm_state(VM_ID, VMLCMState.RUNNING)
+    # Make image not persistent
+    one.set_image_persiency(image_id, persistent=False)
+    # Read the template for the VM
+    with open(VM_TEMPLATE_PATH, "r") as f:
+        template = f.read()
+    # Substitute placeholders with actual values
+    template = template.replace("${TEMPLATE_NAME}", image_long_name)
+    template = template.replace("${IMAGE_ID}", str(image_id))
+    template += f'\nCI_PIPELINE_ID = "{CI_PIPELINE_ID}"\nCI_JOB_ID = "{CI_JOB_ID}"\nCI_COMMIT_SHA = "{CI_COMMIT_SHA}"\n'
+    # Create the VM template
+    vm_template_id = one.create_vm_template(template)
+    if (vm_template_id == -1):
+        exit(1)
