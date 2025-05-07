@@ -75,7 +75,7 @@ if __name__ == "__main__":
     disk_location = calculate_disk_location(image_target)
     block_device_path = os.path.join(DIR_DEV, f"disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0-0-{disk_location}-0")
     # Write the image to the block device
-    # convert_image_format(image_path, block_device_path, "raw")
+    convert_image_format(image_path, block_device_path, "raw")
     # Detach the image from the VM
     detach_image_by_id(one, VM_ID, image_id)
     # Wait for the VM to be in the RUNNING state
