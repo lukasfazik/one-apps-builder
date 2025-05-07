@@ -152,6 +152,8 @@ deploy-images-job:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: deploy-images
   extends: .images
+  variables:
+    DIR_DEV: /host_dev/
   script:
     - ls -la $DIR_EXPORT/${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}.*
     - ./deploy_image.py

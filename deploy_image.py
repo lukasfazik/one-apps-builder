@@ -25,6 +25,7 @@ if __name__ == "__main__":
     LANGUAGE = os.environ.get("LANGUAGE", "en-US")
     VM_TEMPLATE_PATH = os.environ.get("VM_TEMPLATE_PATH", "template.tmpl")
     DIR_EXPORT = os.environ.get("DIR_EXPORT", ".")
+    DIR_DEV = os.environ.get("DIR_DEV", "/dev")
     # Initialize image names
     image_names = ImageNames(IMAGE_NAME_PREFIX, ARCHITECTURE, LANGUAGE, IMAGE_NAME_SUFFIX)
     image_name = DISTRO_NAME + DISTRO_VER + DISTRO_EDITION
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     image_target = one.get_vm_image_target(VM_ID, image_id)
     # get the attached block device
     disk_location = calculate_disk_location(image_target)
-    block_device_path = f"/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0-0-{disk_location}-0"
+    block_device_path = os.path.join(DIR_DEV, f"disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0-0-{disk_location}-0")
     # Write the image to the block device
     # convert_image_format(image_path, block_device_path, "raw")
     # Detach the image from the VM
