@@ -23,6 +23,10 @@ spec:
       description: "Remove images after deployment"
       type: boolean
       default: true
+    image_datastore_id:
+      description: "OpenNebula datastore ID for the images"
+      type: number
+      default: 100
 ---
 
 variables:
@@ -30,6 +34,7 @@ variables:
     GIT_SUBMODULE_STRATEGY: normal
     DIR_EXPORT: /export/$CI_PIPELINE_ID/export
     DIR_BUILD: /export/$CI_PIPELINE_ID/build
+    IMAGE_DATASTORE_ID: $[[ inputs.image_datastore_id ]]
 
 default:
   image: $CI_REGISTRY_IMAGE/one-apps-builder
