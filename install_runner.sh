@@ -40,6 +40,9 @@ if [ ! -f "$READY_FILE" ]; then
     sudo gitlab-runner uninstall
     # Set /dev/kvm permissions via udev rule (applies after reboot)
     sudo echo 'KERNEL=="kvm", MODE="0666"' > /etc/udev/rules.d/99-gitlab-runner-kvm.rules
+    # Set disk permissions via udev rule (applies after reboot)
+    echo 'SUBSYSTEM=="block", KERNEL=="sd[c-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-gitlab-runner.rules
+    echo 'SUBSYSTEM=="block", KERNEL=="sd[a-z][a-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-gitlab-runner.rules
     # Prepare the user
     sudo apt-get install -y uidmap
     sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 "$CI_USER"
@@ -55,7 +58,7 @@ if [ ! -f "$READY_FILE" ]; then
     fi
     # Configure the runner
     sudo -i -u "$CI_USER" DOCKER_HOST="$DOCKER_HOST" CI_SERVER_TOKEN="$CI_SERVER_TOKEN" CI_SERVER_URL="$CI_SERVER_URL" \
-            gitlab-runner register --non-interactive --executor "docker" --docker-image alpine:latest --docker-devices "/dev/kvm"  --env "VM_ID=$VM_ID" --docker-volumes "runner-cache:/cache" --docker-volumes "runner-export:/export"
+            gitlab-runner register --non-interactive --executor "docker" --docker-image alpine:latest --docker-devices "/dev/kvm"  --env "VM_ID=$VM_ID" --docker-volumes "/dev/:/host_dev/" --docker-volumes "runner-cache:/cache" --docker-volumes "runner-export:/export"
     sudo gitlab-runner install --working-directory "/home/$CI_USER" --config "/home/$CI_USER/.gitlab-runner/config.toml" --init-user "$CI_USER"
     # Reset the runner token because original token is visible in the VM configuration
     sudo -i -u "$CI_USER" gitlab-runner reset-token --all-runners
