@@ -117,16 +117,17 @@ build-addon-context-job:
   image: $CI_REGISTRY_IMAGE/context-builder
   variables:
     GIT_SUBMODULE_PATHS: one-apps
+    DISTRO_NAME: $[[ inputs.distro_name ]]
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: prepare-dependencies
   script:
-    - make -C one-apps context-iso DIR_EXPORT="$DIR_EXPORT"
+    - if [ "$DISTRO_NAME" = "windows" ]; then TARGET="context-windows"; else TARGET="context-linux"; fi
+    - make -C one-apps "$TARGET"
   cache:
     key: addon-context-cache
     paths:
       - one-apps/context-*/out/*
-      - "$DIR_EXPORT/one-context.iso"
     policy: pull-push
 
 download-virtio-drivers-job:
@@ -155,7 +156,6 @@ build-images-job:
     - key: addon-context-cache
       paths:
         - one-apps/context-*/out/*
-        - "$DIR_EXPORT/one-context.iso"
       policy: pull
     - key: virtio-drivers-cache
       paths:
