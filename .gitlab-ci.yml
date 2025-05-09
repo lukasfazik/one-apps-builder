@@ -27,6 +27,14 @@ spec:
       description: "OpenNebula datastore ID for the images"
       type: number
       default: 100
+    image_name_prefix:
+      description: "Prefix for the image & template names in OpenNebula"
+      type: string
+      default: ""
+    image_name_suffix:
+      description: "Suffix for the image & template names in Opennebula"
+      type: string
+      default: " $CI_PIPELINE_ID"
 ---
 
 variables:
@@ -36,6 +44,8 @@ variables:
     DIR_BUILD: /mnt/data/$CI_PIPELINE_ID/build
     PACKER_CACHE_DIR: /mnt/data/packer_cache
     IMAGE_DATASTORE_ID: $[[ inputs.image_datastore_id ]]
+    IMAGE_NAME_PREFIX: $[[ inputs.image_name_prefix ]]
+    IMAGE_NAME_SUFFIX: $[[ inputs.image_name_suffix ]]
 
 default:
   image: $CI_REGISTRY_IMAGE/one-apps-builder
