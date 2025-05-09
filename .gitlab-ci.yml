@@ -23,6 +23,10 @@ spec:
       description: "Remove images after deployment"
       type: boolean
       default: true
+    image_datastore_id:
+      description: "OpenNebula datastore ID for the images"
+      type: number
+      default: 100
 ---
 
 variables:
@@ -30,6 +34,7 @@ variables:
     GIT_SUBMODULE_STRATEGY: normal
     DIR_EXPORT: /export/$CI_PIPELINE_ID/export
     DIR_BUILD: /export/$CI_PIPELINE_ID/build
+    IMAGE_DATASTORE_ID: $[[ inputs.image_datastore_id ]]
 
 default:
   image: $CI_REGISTRY_IMAGE/one-apps-builder
@@ -89,6 +94,22 @@ build-context-builder-job:
     - podman build -t "$IMAGE" -f context-builder.dockerfile
     - podman push "$IMAGE"
 
+build-image-deployer-job:
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE/image-deployer
+  image:
+    name: quay.io/podman/stable
+    docker:
+      user: podman
+  stage: build-containers
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+  script:
+    - podman build -t "$IMAGE" -f image-deployer.dockerfile
+    - podman push "$IMAGE"
+
 build-addon-context-job:
   image: $CI_REGISTRY_IMAGE/context-builder
   variables:
@@ -143,12 +164,15 @@ build-images-job:
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}" DIR_EXPORT="$DIR_EXPORT" DIR_BUILD="$DIR_BUILD"
 
 deploy-images-job:
+  image: $CI_REGISTRY_IMAGE/image-deployer
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: deploy-images
   extends: .images
+  variables:
+    DIR_DEV: /host_dev/
   script:
-    - ls -la $DIR_EXPORT/${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}.*
+    - ./deploy_image.py
     - if $[[ inputs.remove_images ]]; then rm -f $DIR_EXPORT/${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}.*; fi
 
 delete-images-job:
