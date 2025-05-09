@@ -138,7 +138,8 @@ build-addon-context-job:
   stage: prepare-dependencies
   script:
     - if [ "$DISTRO_NAME" = "windows" ]; then TARGET="context-windows"; else TARGET="context-linux"; fi
-    - make -C one-apps "$TARGET"
+    - if [ "$DEBUG" = "true" ]; then VERBOSE=1; fi
+    - make -C one-apps "$TARGET" VERBOSE="$VERBOSE"
   cache:
     key: addon-context-cache
     paths:
@@ -155,7 +156,8 @@ download-virtio-drivers-job:
   variables:
     VIRTIO_ISO_PATH: one-apps/packer/windows/iso/virtio-win.iso
   script:
-    - curl -L -R -o "$VIRTIO_ISO_PATH" --time-cond "$VIRTIO_ISO_PATH" 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso'
+    - if [ "$DEBUG" = "true" ]; then VERBOSE_FLAG="-v"; fi
+    - curl $VERBOSE_FLAG -L -R -o "$VIRTIO_ISO_PATH" --time-cond "$VIRTIO_ISO_PATH" 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso'
   cache:
     key: virtio-drivers-cache
     paths:
