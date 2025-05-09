@@ -172,7 +172,6 @@ deploy-images-job:
   variables:
     DIR_DEV: /host_dev/
   script:
-    - ls -la $DIR_EXPORT/${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}.*
     - ./deploy_image.py
     - if $[[ inputs.remove_images ]]; then rm -f $DIR_EXPORT/${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}.*; fi
 
