@@ -34,6 +34,7 @@ variables:
     GIT_SUBMODULE_STRATEGY: normal
     DIR_EXPORT: /data/$CI_PIPELINE_ID/export
     DIR_BUILD: /data/$CI_PIPELINE_ID/build
+    PACKER_CACHE_DIR: /data/packer_cache
     IMAGE_DATASTORE_ID: $[[ inputs.image_datastore_id ]]
 
 default:
