@@ -35,6 +35,10 @@ spec:
       description: "Suffix for the image & template names in Opennebula"
       type: string
       default: " $CI_PIPELINE_ID"
+    debug:
+      description: "Enable debug mode"
+      type: boolean
+      default: false
 ---
 
 variables:
@@ -46,6 +50,7 @@ variables:
     IMAGE_DATASTORE_ID: $[[ inputs.image_datastore_id ]]
     IMAGE_NAME_PREFIX: $[[ inputs.image_name_prefix ]]
     IMAGE_NAME_SUFFIX: $[[ inputs.image_name_suffix ]]
+    DEBUG: $[[ inputs.debug ]]
 
 default:
   image: $CI_REGISTRY_IMAGE/one-apps-builder
@@ -174,7 +179,8 @@ build-images-job:
   variables:
     GIT_SUBMODULE_PATHS: one-apps
   script:
-    - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}" DIR_EXPORT="$DIR_EXPORT" DIR_BUILD="$DIR_BUILD"
+    - if [ "$DEBUG" = "true" ]; then PACKER_LOG=1; VERBOSE=1; else PACKER_LOG=0; VERBOSE=0; fi
+    - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}" DIR_EXPORT="$DIR_EXPORT" DIR_BUILD="$DIR_BUILD" PACKER_LOG="$PACKER_LOG" PACKER_HEADLESS=true VERBOSE="$VERBOSE"
 
 deploy-images-job:
   image: $CI_REGISTRY_IMAGE/image-deployer
