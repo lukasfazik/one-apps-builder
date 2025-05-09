@@ -56,9 +56,13 @@ if [ ! -f "$READY_FILE" ]; then
         sudo systemctl -M "$CI_USER@" --user enable --now podman.socket
         export DOCKER_HOST="unix:///run/user/$(id -u $CI_USER)/podman/podman.sock"
     fi
+    # Create the runner data direcotry
+    sudo -i -u "$CI_USER" mkdir -p '$HOME/runner-data'
+    sudo -i -u "$CI_USER" chmod 1777 '$HOME'/runner-data
+    sudo -i -u "$CI_USER" mkdir -p '$HOME/runner-cache'
     # Configure the runner
     sudo -i -u "$CI_USER" DOCKER_HOST="$DOCKER_HOST" CI_SERVER_TOKEN="$CI_SERVER_TOKEN" CI_SERVER_URL="$CI_SERVER_URL" \
-            gitlab-runner register --non-interactive --executor "docker" --docker-image alpine:latest --docker-devices "/dev/kvm"  --env "VM_ID=$VM_ID" --docker-volumes "/dev/:/host_dev/" --docker-volumes "runner-cache:/cache" --docker-volumes "runner-export:/export"
+            gitlab-runner register --non-interactive --executor "docker" --docker-image alpine:latest --docker-devices "/dev/kvm"  --env "VM_ID=$VM_ID" --docker-volumes "/dev/:/host_dev/" --docker-volumes '$HOME/runner-cache:/cache' --docker-volumes '$HOME/runner-data:/data'
     sudo gitlab-runner install --working-directory "/home/$CI_USER" --config "/home/$CI_USER/.gitlab-runner/config.toml" --init-user "$CI_USER"
     # Reset the runner token because original token is visible in the VM configuration
     sudo -i -u "$CI_USER" gitlab-runner reset-token --all-runners
