@@ -38,6 +38,8 @@ variables:
 
 default:
   image: $CI_REGISTRY_IMAGE/one-apps-builder
+  before_script:
+  - umask 0022
 
 stages:
   - build-containers
