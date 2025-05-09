@@ -32,8 +32,8 @@ spec:
 variables:
     GIT_SUBMODULE_FORCE_HTTPS: true
     GIT_SUBMODULE_STRATEGY: normal
-    DIR_EXPORT: /data/$CI_PIPELINE_ID/export
-    DIR_BUILD: /data/$CI_PIPELINE_ID/build
+    DIR_EXPORT: /mnt/data/$CI_PIPELINE_ID/export
+    DIR_BUILD: /mnt/data/$CI_PIPELINE_ID/build
     PACKER_CACHE_DIR: /data/packer_cache
     IMAGE_DATASTORE_ID: $[[ inputs.image_datastore_id ]]
 
@@ -117,17 +117,18 @@ build-addon-context-job:
   image: $CI_REGISTRY_IMAGE/context-builder
   variables:
     GIT_SUBMODULE_PATHS: one-apps
+    DISTRO_NAME: $[[ inputs.distro_name ]]
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: prepare-dependencies
   script:
-    - make -C one-apps context-iso DIR_EXPORT="$DIR_EXPORT"
+    - if [ "$DISTRO_NAME" = "windows" ]; then TARGET="context-windows"; else TARGET="context-linux"; fi
+    - make -C one-apps "$TARGET"
   cache:
     key: addon-context-cache
     paths:
       - one-apps/context-*/out/*
-      - "$DIR_EXPORT/one-context.iso"
-    policy: push
+    policy: pull-push
 
 download-virtio-drivers-job:
   image:
@@ -155,7 +156,6 @@ build-images-job:
     - key: addon-context-cache
       paths:
         - one-apps/context-*/out/*
-        - "$DIR_EXPORT/one-context.iso"
       policy: pull
     - key: virtio-drivers-cache
       paths:
