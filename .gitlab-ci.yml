@@ -32,8 +32,8 @@ spec:
 variables:
     GIT_SUBMODULE_FORCE_HTTPS: true
     GIT_SUBMODULE_STRATEGY: normal
-    DIR_EXPORT: /data/$CI_PIPELINE_ID/export
-    DIR_BUILD: /data/$CI_PIPELINE_ID/build
+    DIR_EXPORT: /mnt/data/$CI_PIPELINE_ID/export
+    DIR_BUILD: /mnt/data/$CI_PIPELINE_ID/build
     PACKER_CACHE_DIR: /data/packer_cache
     IMAGE_DATASTORE_ID: $[[ inputs.image_datastore_id ]]
 
