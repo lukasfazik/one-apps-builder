@@ -94,6 +94,22 @@ build-context-builder-job:
     - podman build -t "$IMAGE" -f context-builder.dockerfile
     - podman push "$IMAGE"
 
+build-image-deployer-job:
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE/image-deployer
+  image:
+    name: quay.io/podman/stable
+    docker:
+      user: podman
+  stage: build-containers
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+  script:
+    - podman build -t "$IMAGE" -f image-deployer.dockerfile
+    - podman push "$IMAGE"
+
 build-addon-context-job:
   image: $CI_REGISTRY_IMAGE/context-builder
   variables:
@@ -148,6 +164,7 @@ build-images-job:
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}" DIR_EXPORT="$DIR_EXPORT" DIR_BUILD="$DIR_BUILD"
 
 deploy-images-job:
+  image: $CI_REGISTRY_IMAGE/image-deployer
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: deploy-images
