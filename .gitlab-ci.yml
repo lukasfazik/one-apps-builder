@@ -127,7 +127,7 @@ build-addon-context-job:
     paths:
       - one-apps/context-*/out/*
       - "$DIR_EXPORT/one-context.iso"
-    policy: push
+    policy: pull-push
 
 download-virtio-drivers-job:
   image:
