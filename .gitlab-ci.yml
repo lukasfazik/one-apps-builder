@@ -128,6 +128,22 @@ build-linux-builder-job:
     - podman build -t "$IMAGE" -f linux-builder.dockerfile
     - podman push "$IMAGE"
 
+build-windows-builder-job:
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE/windows-builder
+  image:
+    name: quay.io/podman/stable
+    docker:
+      user: podman
+  stage: build-containers
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+  script:
+    - podman build -t "$IMAGE" -f windows-builder.dockerfile
+    - podman push "$IMAGE"
+
 build-image-deployer-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
