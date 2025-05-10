@@ -80,103 +80,29 @@ workflow:
       DISTRO_VER: $[[ inputs.distro_versions ]]
       DISTRO_EDITION: $[[ inputs.distro_editions ]]
 
-build-one-apps-builder-job:
+build-containers-job:
+  stage: build-containers
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
-  variables:
-    IMAGE: $CI_REGISTRY_IMAGE/one-apps-builder
   image:
     name: quay.io/podman/stable
     docker:
       user: podman
-  stage: build-containers
+  variables:
+    FULL_IMAGE_NAME: $CI_REGISTRY_IMAGE/$IMAGE_NAME
+  parallel:
+    matrix:
+    - IMAGE_NAME:
+        - one-apps-builder
+        - context-builder
+        - linux-builder
+        - windows-builder
+        - image-deployer
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
   script:
-    - podman build -t "$IMAGE" -f Containerfile
-    - podman push "$IMAGE"
-
-build-context-builder-job:
-  rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
-  variables:
-    IMAGE: $CI_REGISTRY_IMAGE/context-builder
-  image:
-    name: quay.io/podman/stable
-    docker:
-      user: podman
-  stage: build-containers
-  before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
-  script:
-    - podman build -t "$IMAGE" -f context-builder.dockerfile
-    - podman push "$IMAGE"
-
-build-linux-builder-job:
-  rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
-  variables:
-    IMAGE: $CI_REGISTRY_IMAGE/linux-builder
-  image:
-    name: quay.io/podman/stable
-    docker:
-      user: podman
-  stage: build-containers
-  before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
-  script:
-    - podman build -t "$IMAGE" -f linux-builder.dockerfile
-    - podman push "$IMAGE"
-
-build-windows-builder-job:
-  rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
-  variables:
-    IMAGE: $CI_REGISTRY_IMAGE/windows-builder
-  image:
-    name: quay.io/podman/stable
-    docker:
-      user: podman
-  stage: build-containers
-  before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
-  script:
-    - podman build -t "$IMAGE" -f windows-builder.dockerfile
-    - podman push "$IMAGE"
-
-build-image-deployer-job:
-  rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
-  variables:
-    IMAGE: $CI_REGISTRY_IMAGE/image-deployer
-  image:
-    name: quay.io/podman/stable
-    docker:
-      user: podman
-  stage: build-containers
-  before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
-  script:
-    - podman build -t "$IMAGE" -f image-deployer.dockerfile
-    - podman push "$IMAGE"
-
-build-addon-context-job:
-  image: $CI_REGISTRY_IMAGE/context-builder
-  variables:
-    GIT_SUBMODULE_PATHS: one-apps
-    DISTRO_NAME: $[[ inputs.distro_name ]]
-  rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
-  stage: prepare-dependencies
-  script:
-    - if [ "$DISTRO_NAME" = "windows" ]; then TARGET="context-windows"; else TARGET="context-linux"; fi
-    - if [ "$DEBUG" = "true" ]; then VERBOSE="1";else VERBOSE="0"; fi
-    - make -C one-apps "$TARGET" VERBOSE="$VERBOSE"
-  cache:
-    key: addon-context-cache
-    paths:
-      - one-apps/context-*/out/*
-    policy: pull-push
+    - podman build -t "$FULL_IMAGE_NAME" -f "$IMAGE_NAME.dockerfile"
+    - podman push "$FULL_IMAGE_NAME"
 
 download-virtio-drivers-job:
   image:
