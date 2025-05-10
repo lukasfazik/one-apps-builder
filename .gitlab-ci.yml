@@ -227,7 +227,10 @@ build-windows-images-job:
   image: $CI_REGISTRY_IMAGE/windows-builder
 
 deploy-images-job:
-  image: $CI_REGISTRY_IMAGE/image-deployer
+  image:
+    name: $CI_REGISTRY_IMAGE/image-deployer
+    docker:
+      user: root
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: deploy-images
