@@ -101,7 +101,7 @@ build-containers-job:
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
   script:
-    - podman build -t "$FULL_IMAGE_NAME" -f "$IMAGE_NAME.dockerfile"
+    - podman build -t "$FULL_IMAGE_NAME" -f "containers/$IMAGE_NAME.dockerfile"
     - podman push "$FULL_IMAGE_NAME"
 
 download-virtio-drivers-job:
