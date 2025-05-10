@@ -170,7 +170,7 @@ build-addon-context-job:
   stage: prepare-dependencies
   script:
     - if [ "$DISTRO_NAME" = "windows" ]; then TARGET="context-windows"; else TARGET="context-linux"; fi
-    - if [ "$DEBUG" = "true" ]; then VERBOSE=1; fi
+    - if [ "$DEBUG" = "true" ]; then VERBOSE="1";else VERBOSE="0"; fi
     - make -C one-apps "$TARGET" VERBOSE="$VERBOSE"
   cache:
     key: addon-context-cache
