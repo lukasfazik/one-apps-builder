@@ -112,6 +112,22 @@ build-context-builder-job:
     - podman build -t "$IMAGE" -f context-builder.dockerfile
     - podman push "$IMAGE"
 
+build-linux-builder-job:
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE/linux-builder
+  image:
+    name: quay.io/podman/stable
+    docker:
+      user: podman
+  stage: build-containers
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | podman login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+  script:
+    - podman build -t "$IMAGE" -f linux-builder.dockerfile
+    - podman push "$IMAGE"
+
 build-image-deployer-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-containers"'
