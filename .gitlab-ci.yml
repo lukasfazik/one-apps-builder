@@ -196,9 +196,7 @@ download-virtio-drivers-job:
       - one-apps/packer/windows/iso/virtio-win.iso
     policy: pull-push
 
-build-images-job:
-  rules:
-    - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
+.build-images-job:
   stage: build-images
   extends: .images
   cache:
@@ -215,6 +213,18 @@ build-images-job:
   script:
     - if [ "$DEBUG" = "true" ]; then PACKER_LOG=1; VERBOSE=1; else PACKER_LOG=0; VERBOSE=0; fi
     - make -C one-apps "${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}" DIR_EXPORT="$DIR_EXPORT" DIR_BUILD="$DIR_BUILD" PACKER_LOG="$PACKER_LOG" PACKER_HEADLESS=true VERBOSE="$VERBOSE"
+
+build-linux-images-job:
+  extends: .build-images-job
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" != "windows"'
+  image: $CI_REGISTRY_IMAGE/linux-builder
+
+build-windows-images-job:
+  extends: .build-images-job
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
+  image: $CI_REGISTRY_IMAGE/windows-builder
 
 deploy-images-job:
   image: $CI_REGISTRY_IMAGE/image-deployer
