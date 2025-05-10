@@ -104,6 +104,24 @@ build-containers-job:
     - podman build -t "$FULL_IMAGE_NAME" -f "containers/$IMAGE_NAME.dockerfile"
     - podman push "$FULL_IMAGE_NAME"
 
+build-addon-context-job:
+  image: $CI_REGISTRY_IMAGE/context-builder
+  variables:
+    GIT_SUBMODULE_PATHS: one-apps
+    DISTRO_NAME: $[[ inputs.distro_name ]]
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
+  stage: prepare-dependencies
+  script:
+    - if [ "$DISTRO_NAME" = "windows" ]; then TARGET="context-windows"; else TARGET="context-linux"; fi
+    - if [ "$DEBUG" = "true" ]; then VERBOSE="1";else VERBOSE="0"; fi
+    - make -C one-apps "$TARGET" VERBOSE="$VERBOSE"
+  cache:
+    key: addon-context-cache
+    paths:
+      - one-apps/context-*/out/*
+    policy: pull-push
+
 download-virtio-drivers-job:
   image:
     name: quay.io/curl/curl:latest
