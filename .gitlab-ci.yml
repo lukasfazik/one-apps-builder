@@ -186,11 +186,11 @@ deploy-images-job:
     - if $[[ inputs.remove_images ]]; then rm -f $DIR_EXPORT/${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}.*; fi
 
 delete-images-job:
+  image: $CI_REGISTRY_IMAGE/image-deployer
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: delete-images
   script:
-    - echo "Removing VM template..."
-    - echo "VM template removed successfully."
+    - ./delete_images.py
   when: manual
   manual_confirmation: 'Are you sure you want to delete the added template with images?'

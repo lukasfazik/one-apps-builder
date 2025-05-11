@@ -153,7 +153,7 @@ class One:
             logger.error(f"Failed to create new VM template: {e}")
             return -1
 
-    def delete_vm_template(self, template_id: int) -> bool:
+    def delete_vm_template(self, template_id: int, delete_images: bool = False) -> bool:
         """
         Delete a VM template by ID.
         :param template_id: Template ID.
@@ -161,7 +161,7 @@ class One:
         """
         logger.debug(f"Deleting VM template with ID: {template_id}")
         try:
-            return self._one.template.delete(template_id) != -1
+            return self._one.template.delete(template_id, delete_images) != -1
         except pyone.OneException as e:
             logger.error(f"Failed to delete VM template with ID: {template_id}: {e}")
             return False
@@ -334,3 +334,31 @@ class One:
                 logger.warning(f"Timeout waiting for VM {vm_id} to reach state {target_state.name}, last state: {current_state[state_index].name}")
                 return False
             time.sleep(1)
+
+    def find_templates_by_attributes(self, filter: int, attributes: dict) -> Optional[List[int]]:
+        """
+        Find a VM template by its attributes.
+        :param filter: The filter values dictate which resources to search:
+                        -4: Resources belonging to the user’s primary group.
+                        -3: Resources belonging to the user (default).
+                        -2: All resources.
+                        -1: Resources belonging to the user and any of his groups.
+                        >= 0: Resources belonging to the UID (User’s Resources).
+        :param **kwargs: Attributes to search for in the template.
+        :return: Template ID if found, None otherwise.
+        """
+        logger.debug(f"Finding VM template by attributes: {attributes}")
+        result = list()
+        try:
+            templates = self._one.templatepool.info(filter, -1, -1)
+            for template in templates.VMTEMPLATE:
+                match = all(template.TEMPLATE.get(key) == value for key, value in attributes.items())
+                if match:
+                    logger.debug(f"Found VM template with ID: {template.ID}")
+                    result.append(template.ID)
+        except pyone.OneException as e:
+            logger.error(f"Failed to find VM template by attributes, error: {e}")
+            return None
+        if len(result) == 0:
+            logger.warning(f"No VM templates found with the given attributes")
+        return result
