@@ -120,7 +120,7 @@ build-addon-context-job:
     key: addon-context-cache
     paths:
       - one-apps/context-*/out/*
-    policy: pull-push
+    policy: push
 
 download-virtio-drivers-job:
   image:
