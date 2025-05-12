@@ -70,7 +70,7 @@ def unlock(lock_file_path: str) -> bool:
         loggger.warning(f"Failed to remove lock file: {e}")
         return False
 
-def acquire_lock(lock_file_path: str, timeout: int = 60) -> bool:
+def acquire_lock(lock_file_path: str, timeout: int = 300) -> bool:
     """
     Tryies to acquire a lock using the exclusively openned file.
     :param path: Path to the lock file.
