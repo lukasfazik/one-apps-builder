@@ -46,6 +46,8 @@ variables:
     GIT_SUBMODULE_STRATEGY: normal
     DIR_EXPORT: /mnt/data/$CI_PIPELINE_ID/export
     DIR_BUILD: /mnt/data/$CI_PIPELINE_ID/build
+    CONTEXT_WINDOWS_OUT: /mnt/data/$CI_PIPELINE_ID/context-windows-out
+    CONTEXT_LINUX_OUT: /mnt/data/$CI_PIPELINE_ID/context-linux-out
     PACKER_CACHE_DIR: /mnt/data/packer_cache
     IMAGE_DATASTORE_ID: $[[ inputs.image_datastore_id ]]
     IMAGE_NAME_PREFIX: $[[ inputs.image_name_prefix ]]
@@ -104,7 +106,7 @@ build-containers-job:
     - podman build -t "$FULL_IMAGE_NAME" -f "containers/$IMAGE_NAME.dockerfile"
     - podman push "$FULL_IMAGE_NAME"
 
-build-addon-context-job:
+.build-addon-context-job:
   image: $CI_REGISTRY_IMAGE/context-builder
   variables:
     GIT_SUBMODULE_PATHS: one-apps
@@ -112,15 +114,31 @@ build-addon-context-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images"'
   stage: prepare-dependencies
-  script:
-    - if [ "$DISTRO_NAME" = "windows" ]; then TARGET="context-windows"; else TARGET="context-linux"; fi
+  before_script:
     - if [ "$DEBUG" = "true" ]; then VERBOSE="1";else VERBOSE="0"; fi
-    - make -C one-apps "$TARGET" VERBOSE="$VERBOSE"
   cache:
     key: addon-context-cache
     paths:
       - one-apps/context-*/out/*
     policy: pull-push
+
+build-addon-context-linux-job:
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" != "windows"'
+  extends: .build-addon-context-job
+  script:
+    - mkdir -p "$CONTEXT_LINUX_OUT"
+    - make -C one-apps context-linux VERBOSE="$VERBOSE"
+    - cp -R one-apps/context-linux/out/* "$CONTEXT_LINUX_OUT"
+
+build-addon-context-windows-job:
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
+  extends: .build-addon-context-job
+  script:
+    - mkdir -p "$CONTEXT_WINDOWS_OUT"
+    - make -C one-apps context-windows VERBOSE="$VERBOSE"
+    - cp -R one-apps/context-windows/out/* "$CONTEXT_WINDOWS_OUT"
 
 download-virtio-drivers-job:
   image:
@@ -144,10 +162,6 @@ download-virtio-drivers-job:
   stage: build-images
   extends: .images
   cache:
-    - key: addon-context-cache
-      paths:
-        - one-apps/context-*/out/*
-      policy: pull
     - key: virtio-drivers-cache
       paths:
         - one-apps/packer/windows/iso/virtio-win.iso
@@ -163,12 +177,18 @@ build-linux-images-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" != "windows"'
   image: $CI_REGISTRY_IMAGE/linux-builder
+  before_script:
+    - mkdir -p one-apps/context-linux/out
+    - cp -rf "$CONTEXT_LINUX_OUT"/* one-apps/context-linux/out/
 
 build-windows-images-job:
   extends: .build-images-job
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
   image: $CI_REGISTRY_IMAGE/windows-builder
+  before_script:
+    - mkdir -p one-apps/context-windows/out
+    - cp -rf "$CONTEXT_WINDOWS_OUT"/* one-apps/context-windows/out/
 
 deploy-images-job:
   image:
