@@ -1,6 +1,8 @@
 from one import One
 from states import VMLCMState
 import logging
+import os
+import time
 
 loggger = logging.getLogger("main." + __name__)
 
@@ -37,3 +39,50 @@ def detach_image_by_id(one: One, vm_id: int, image_id: int) -> bool:
                 loggger.error(f"Failed to detach disk {disk_id} from VM {vm_id}")
                 return False
     return True
+
+def lock(lock_file_path: str) -> bool:
+    """
+    Creates a lock using a exclusive file creation.
+    :param path: Path to the lock file.
+    :return: True if the file was created successfully, False otherwise.
+    """
+    loggger.debug(f"Acquiring lock on file: {lock_file_path}")
+    try:
+        with open(lock_file_path, 'x') as f:
+            loggger.debug(f"Lock file created successfully")
+            return True
+    except Exception as e:
+        loggger.warning(f"Failed to create lock file: {e}")
+        return False
+
+def unlock(lock_file_path: str) -> bool:
+    """
+    Removes a lock by deleting the lock file.
+    :param path: Path to the lock file.
+    :return: True if the file wasremoved successfully, False otherwise.
+    """
+    loggger.debug(f"Releasing lock on file: {lock_file_path}")
+    try:
+        os.remove(lock_file_path)
+        loggger.debug(f"Lock file removed successfully")
+        return True
+    except Exception as e:
+        loggger.warning(f"Failed to remove lock file: {e}")
+        return False
+
+def acquire_lock(lock_file_path: str, timeout: int = 60) -> bool:
+    """
+    Tryies to acquire a lock using the exclusively openned file.
+    :param path: Path to the lock file.
+    :return: True if the lock was acquired, False otherwise.
+    """
+    loggger.debug(f"Acquiring lock using file: {lock_file_path}")
+    start_time = time.time()
+    while True:
+        if lock(lock_file_path):
+            loggger.debug(f"Lock acquired")
+            return True
+        if time.time() - start_time > timeout:
+            loggger.error(f"Failed to acquire lock using file: {lock_file_path} within timeout: {timeout} seconds")
+            return False
+        time.sleep(1)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 from image_names import ImageNames
-from utils import detach_image_by_id, calculate_disk_location
+from utils import detach_image_by_id, calculate_disk_location, acquire_lock, unlock
 from one import One, ImageType, ImageDevPrefix, ImageFormat
 from states import VMLCMState, ImageState
 from qemu import get_qemu_image_size_mb, convert_image_format
@@ -59,6 +59,8 @@ if __name__ == "__main__":
     loggger.debug(f"DIR_EXPORT: {DIR_EXPORT}")
     DIR_DEV = os.environ.get("DIR_DEV", "/dev")
     loggger.debug(f"DIR_DEV: {DIR_DEV}")
+    LOCK_FILE_PATH = os.environ.get("LOCK_FILE_PATH", "/tmp/one.lock")
+    loggger.debug(f"LOCK_FILE_PATH: {LOCK_FILE_PATH}")
     # Initialize image names
     image_names = ImageNames(IMAGE_NAME_PREFIX, ARCHITECTURE, LANGUAGE, IMAGE_NAME_SUFFIX)
     image_name = DISTRO_NAME + DISTRO_VER + DISTRO_EDITION
@@ -109,9 +111,11 @@ if __name__ == "__main__":
     one.wait_for_image_state(image_id, ImageState.READY)
     # Attach the image to the VM
     loggger.info(f"Attaching image {image_id} to VM {VM_ID}")
+    acquire_lock(LOCK_FILE_PATH)
     one.attach_vm_image(vm_id=VM_ID, image_id=image_id, dev_prefix=ImageDevPrefix.SD)
     # Wait for the VM to be in the RUNNING state
     one.wait_for_vm_state(VM_ID, VMLCMState.RUNNING)
+    unlock(LOCK_FILE_PATH)
     # get the TAGRET of the image
     loggger.info(f"Getting attached image target")
     image_target = one.get_vm_image_target(VM_ID, image_id)
@@ -128,7 +132,10 @@ if __name__ == "__main__":
     if convert_image_format(image_path, block_device_path, "raw") is False:
         loggger.critical(f"Failed to write image")
         loggger.info(f"Detaching image from the VM...")
+        acquire_lock(LOCK_FILE_PATH)
         detach_image_by_id(one, VM_ID, image_id)
+        one.wait_for_vm_state(VM_ID, VMLCMState.RUNNING)
+        unlock(LOCK_FILE_PATH)
         one.wait_for_image_state(image_id, ImageState.READY)
         loggger.info(f"Deleting image...")
         one.delete_image(image_id)
@@ -136,9 +143,11 @@ if __name__ == "__main__":
     loggger.info(f"Image written to block device")
     # Detach the image from the VM
     loggger.info(f"Detaching image from the VM...")
+    acquire_lock(LOCK_FILE_PATH)
     detach_image_by_id(one, VM_ID, image_id)
     # Wait for the VM to be in the RUNNING state
     one.wait_for_vm_state(VM_ID, VMLCMState.RUNNING)
+    unlock(LOCK_FILE_PATH)
     # Make image not persistent
     loggger.info(f"Making image not persistent...")
     one.set_image_persiency(image_id, persistent=False)
