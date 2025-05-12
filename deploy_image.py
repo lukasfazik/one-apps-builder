@@ -111,7 +111,9 @@ if __name__ == "__main__":
     one.wait_for_image_state(image_id, ImageState.READY)
     # Attach the image to the VM
     loggger.info(f"Attaching image {image_id} to VM {VM_ID}")
-    acquire_lock(LOCK_FILE_PATH)
+    if acquire_lock(LOCK_FILE_PATH) is False:
+        loggger.critical(f"Failed to acquire lock: {LOCK_FILE_PATH}")
+        exit(1)
     one.attach_vm_image(vm_id=VM_ID, image_id=image_id, dev_prefix=ImageDevPrefix.SD)
     # Wait for the VM to be in the RUNNING state
     one.wait_for_vm_state(VM_ID, VMLCMState.RUNNING)
@@ -132,7 +134,9 @@ if __name__ == "__main__":
     if convert_image_format(image_path, block_device_path, "raw") is False:
         loggger.critical(f"Failed to write image")
         loggger.info(f"Detaching image from the VM...")
-        acquire_lock(LOCK_FILE_PATH)
+        if acquire_lock(LOCK_FILE_PATH) is False:
+            loggger.critical(f"Failed to acquire lock: {LOCK_FILE_PATH}")
+            exit(1)
         detach_image_by_id(one, VM_ID, image_id)
         one.wait_for_vm_state(VM_ID, VMLCMState.RUNNING)
         unlock(LOCK_FILE_PATH)
@@ -143,7 +147,9 @@ if __name__ == "__main__":
     loggger.info(f"Image written to block device")
     # Detach the image from the VM
     loggger.info(f"Detaching image from the VM...")
-    acquire_lock(LOCK_FILE_PATH)
+    if acquire_lock(LOCK_FILE_PATH) is False:
+        loggger.critical(f"Failed to acquire lock: {LOCK_FILE_PATH}")
+        exit(1)
     detach_image_by_id(one, VM_ID, image_id)
     # Wait for the VM to be in the RUNNING state
     one.wait_for_vm_state(VM_ID, VMLCMState.RUNNING)
