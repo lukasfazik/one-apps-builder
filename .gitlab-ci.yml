@@ -137,7 +137,7 @@ build-addon-context-windows-job:
   extends: .build-addon-context-job
   script:
     - mkdir -p "$CONTEXT_WINDOWS_OUT"
-    - make -C one-apps context-linux VERBOSE="$VERBOSE"
+    - make -C one-apps context-windows VERBOSE="$VERBOSE"
     - cp -R one-apps/context-windows/out/* "$CONTEXT_WINDOWS_OUT"
 
 download-virtio-drivers-job:
