@@ -71,10 +71,6 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "web"
 
 .images:
-  variables:
-    INPUT_DIR: "one-apps"
-    OUTPUT_DIR: "one-apps/export"
-    PACKER_HEADLESS: "true"
   parallel:
     matrix:
     - DISTRO_NAME: $[[ inputs.distro_name ]]
