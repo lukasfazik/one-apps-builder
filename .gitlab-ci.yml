@@ -165,11 +165,6 @@ download-virtio-drivers-job:
 .build-images-job:
   stage: build-images
   extends: .images
-  cache:
-    - key: virtio-drivers-cache
-      paths:
-        - one-apps/packer/windows/iso/virtio-win.iso
-      policy: pull
   variables:
     GIT_SUBMODULE_PATHS: one-apps
   script:
@@ -187,6 +182,11 @@ build-linux-images-job:
 
 build-windows-images-job:
   extends: .build-images-job
+  cache:
+    - key: virtio-drivers-cache
+      paths:
+        - one-apps/packer/windows/iso/virtio-win.iso
+      policy: pull
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
   image: $CI_REGISTRY_IMAGE/windows-builder
