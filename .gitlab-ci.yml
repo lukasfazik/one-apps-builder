@@ -53,6 +53,7 @@ variables:
     IMAGE_NAME_PREFIX: $[[ inputs.image_name_prefix ]]
     IMAGE_NAME_SUFFIX: $[[ inputs.image_name_suffix ]]
     DEBUG: $[[ inputs.debug ]]
+    LOCK_FILE_PATH: /mnt/data/one.lock
 
 default:
   image: $CI_REGISTRY_IMAGE/one-apps-builder
