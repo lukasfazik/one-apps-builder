@@ -57,9 +57,6 @@ variables:
     IMAGE_NAME_SUFFIX: $[[ inputs.image_name_suffix ]]
     DEBUG: $[[ inputs.debug ]]
 
-default:
-  image: $CI_REGISTRY_IMAGE/one-apps-builder
-
 stages:
   - build-containers
   - prepare-dependencies
@@ -97,7 +94,6 @@ build-containers-job:
   parallel:
     matrix:
     - IMAGE_NAME:
-        - one-apps-builder
         - context-builder
         - linux-builder
         - windows-builder
