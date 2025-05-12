@@ -178,6 +178,7 @@ build-linux-images-job:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" != "windows"'
   image: $CI_REGISTRY_IMAGE/linux-builder
   before_script:
+    - mkdir -p one-apps/context-linux/out
     - cp -rf "$CONTEXT_LINUX_OUT"/* one-apps/context-linux/out/
 
 build-windows-images-job:
@@ -186,6 +187,7 @@ build-windows-images-job:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
   image: $CI_REGISTRY_IMAGE/windows-builder
   before_script:
+    - mkdir -p one-apps/context-windows/out
     - cp -rf "$CONTEXT_WINDOWS_OUT"/* one-apps/context-windows/out/
 
 deploy-images-job:
