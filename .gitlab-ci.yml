@@ -19,8 +19,8 @@ spec:
       description: "Editions of the distribution"
       type: array
       default: [""]
-    remove_images:
-      description: "Remove images after deployment"
+    remove_artefacts:
+      description: "Remove artefacts after deployment"
       type: boolean
       default: true
     image_datastore_id:
@@ -44,17 +44,18 @@ spec:
 variables:
     GIT_SUBMODULE_FORCE_HTTPS: true
     GIT_SUBMODULE_STRATEGY: normal
-    DIR_EXPORT: /mnt/data/$CI_PIPELINE_ID/export
-    DIR_BUILD: /mnt/data/$CI_PIPELINE_ID/build
-    CONTEXT_WINDOWS_OUT: /mnt/data/$CI_PIPELINE_ID/context-windows-out
-    CONTEXT_LINUX_OUT: /mnt/data/$CI_PIPELINE_ID/context-linux-out
-    PACKER_CACHE_DIR: /mnt/data/packer_cache
-    PACKER_PLUGIN_PATH: /mnt/data/packer_plugins
+    DATA_VOLUME_PATH: /mnt/data
+    DIR_EXPORT: $DATA_VOLUME_PATH/$CI_PIPELINE_ID/export
+    DIR_BUILD: $DATA_VOLUME_PATH/$CI_PIPELINE_ID/build
+    CONTEXT_WINDOWS_OUT: $DATA_VOLUME_PATH/$CI_PIPELINE_ID/context-windows-out
+    CONTEXT_LINUX_OUT: $DATA_VOLUME_PATH/$CI_PIPELINE_ID/context-linux-out
+    PACKER_CACHE_DIR: $DATA_VOLUME_PATH/packer_cache
+    PACKER_PLUGIN_PATH: $DATA_VOLUME_PATH/packer_plugins
+    LOCK_FILE_PATH: $DATA_VOLUME_PATH/one.lock
     IMAGE_DATASTORE_ID: $[[ inputs.image_datastore_id ]]
     IMAGE_NAME_PREFIX: $[[ inputs.image_name_prefix ]]
     IMAGE_NAME_SUFFIX: $[[ inputs.image_name_suffix ]]
     DEBUG: $[[ inputs.debug ]]
-    LOCK_FILE_PATH: /mnt/data/one.lock
 
 default:
   image: $CI_REGISTRY_IMAGE/one-apps-builder
@@ -66,6 +67,7 @@ stages:
   - prepare-dependencies
   - build-images
   - deploy-images
+  - cleanup
   - delete-images
 
 workflow:
@@ -205,7 +207,14 @@ deploy-images-job:
     DIR_DEV: /host_dev/
   script:
     - ./deploy_image.py
-    - if $[[ inputs.remove_images ]]; then rm -f $DIR_EXPORT/${DISTRO_NAME}${DISTRO_VER}${DISTRO_EDITION}.*; fi
+
+cleanup-job:
+  stage: cleanup
+  rules:
+    - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.remove_artefacts ]]" == "true"'
+  when: always
+  script:
+    rm -rf "$DATA_VOLUME_PATH/$CI_PIPELINE_ID"
 
 delete-images-job:
   image: $CI_REGISTRY_IMAGE/image-deployer
