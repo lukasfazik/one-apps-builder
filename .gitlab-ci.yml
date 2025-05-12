@@ -46,8 +46,8 @@ variables:
     GIT_SUBMODULE_STRATEGY: normal
     DIR_EXPORT: /mnt/data/$CI_PIPELINE_ID/export
     DIR_BUILD: /mnt/data/$CI_PIPELINE_ID/build
-    CONTEXT-WINDOWS-OUT: /mnt/data/$CI_PIPELINE_ID/context-windows-out
-    CONTEXT-LINUX-OUT: /mnt/data/$CI_PIPELINE_ID/context-linux-out
+    CONTEXT_WINDOWS_OUT: /mnt/data/$CI_PIPELINE_ID/context-windows-out
+    CONTEXT_LINUX_OUT: /mnt/data/$CI_PIPELINE_ID/context-linux-out
     PACKER_CACHE_DIR: /mnt/data/packer_cache
     IMAGE_DATASTORE_ID: $[[ inputs.image_datastore_id ]]
     IMAGE_NAME_PREFIX: $[[ inputs.image_name_prefix ]]
@@ -127,18 +127,18 @@ build-addon-context-linux-job:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" != "windows"'
   extends: .build-addon-context-job
   script:
-    - mkdir -p "$CONTEXT-LINUX-OUT"
+    - mkdir -p "$CONTEXT_LINUX_OUT"
     - make -C one-apps context-linux VERBOSE="$VERBOSE"
-    - cp -R one-apps/context-linux/out/* "$CONTEXT-LINUX-OUT"
+    - cp -R one-apps/context-linux/out/* "$CONTEXT_LINUX_OUT"
 
 build-addon-context-windows-job:
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
   extends: .build-addon-context-job
   script:
-    - mkdir -p "$CONTEXT-WINDOWS-OUT"
+    - mkdir -p "$CONTEXT_WINDOWS_OUT"
     - make -C one-apps context-linux VERBOSE="$VERBOSE"
-    - cp -R one-apps/context-windows/out/* "$CONTEXT-WINDOWS-OUT"
+    - cp -R one-apps/context-windows/out/* "$CONTEXT_WINDOWS_OUT"
 
 download-virtio-drivers-job:
   image:
@@ -178,7 +178,7 @@ build-linux-images-job:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" != "windows"'
   image: $CI_REGISTRY_IMAGE/linux-builder
   before_script:
-    - cp -rf "$CONTEXT-LINUX-OUT"/* one-apps/context-linux/out/
+    - cp -rf "$CONTEXT_LINUX_OUT"/* one-apps/context-linux/out/
 
 build-windows-images-job:
   extends: .build-images-job
@@ -186,7 +186,7 @@ build-windows-images-job:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.distro_name ]]" == "windows"'
   image: $CI_REGISTRY_IMAGE/windows-builder
   before_script:
-    - cp -rf "$CONTEXT-WINDOWS-OUT"/* one-apps/context-windows/out/
+    - cp -rf "$CONTEXT_WINDOWS_OUT"/* one-apps/context-windows/out/
 
 deploy-images-job:
   image:
