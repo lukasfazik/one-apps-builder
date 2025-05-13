@@ -66,6 +66,10 @@ if [ ! -f "$READY_FILE" ]; then
     sudo gitlab-runner install --working-directory "/home/$CI_USER" --config "/home/$CI_USER/.gitlab-runner/config.toml" --init-user "$CI_USER"
     # Reset the runner token because original token is visible in the VM configuration
     sudo -i -u "$CI_USER" gitlab-runner reset-token --all-runners
+    # Set the number of concurrent jobs
+    if [ -n "$CONCURRENT_JOBS" ]; then
+        sudo -i -u "$CI_USER" sed -i "s/^concurrent = [0-9]*$/concurrent = $CONCURRENT_JOBS/" '$HOME/.gitlab-runner/config.toml'
+    fi
     # restart the server in one minute
     sudo shutdown -r +1
 fi
