@@ -199,6 +199,7 @@ deploy-images-job:
     - ./deploy_image.py
 
 cleanup-job:
+  image: alpine:latest
   stage: cleanup
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.remove_artefacts ]]" == "true"'
