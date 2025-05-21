@@ -41,7 +41,8 @@ if [ ! -f "$READY_FILE" ]; then
     # Set /dev/kvm permissions via udev rule (applies after reboot)
     sudo echo 'KERNEL=="kvm", MODE="0666"' > /etc/udev/rules.d/99-gitlab-runner-kvm.rules
     # Set disk permissions via udev rule (applies after reboot)
-    echo 'SUBSYSTEM=="block", KERNEL=="sd[b-z][a-z]+[0-9]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-gitlab-runner.rules
+    echo 'SUBSYSTEM=="block", KERNEL=="sd[b-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-gitlab-runner.rules
+    echo 'SUBSYSTEM=="block", KERNEL=="sd[a-z][a-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-gitlab-runner.rules
     # Prepare the user
     sudo apt-get install -y uidmap
     sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 "$CI_USER"
