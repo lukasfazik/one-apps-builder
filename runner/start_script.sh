@@ -39,9 +39,9 @@ if [ ! -f "$READY_FILE" ]; then
     sudo gitlab-runner stop
     sudo gitlab-runner uninstall
     # Set /dev/kvm permissions via udev rule (applies after reboot)
-    sudo echo 'KERNEL=="kvm", MODE="0666"' > /etc/udev/rules.d/99-gitlab-runner-kvm.rules
+    sudo echo 'KERNEL=="kvm", MODE="0666"' > /etc/udev/rules.d/99-gitlab-runner.rules
     # Set disk permissions via udev rule (applies after reboot)
-    echo 'SUBSYSTEM=="block", KERNEL=="sd[c-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-gitlab-runner.rules
+    echo 'SUBSYSTEM=="block", KERNEL=="sd[b-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-gitlab-runner.rules
     echo 'SUBSYSTEM=="block", KERNEL=="sd[a-z][a-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-gitlab-runner.rules
     # Prepare the user
     sudo apt-get install -y uidmap
