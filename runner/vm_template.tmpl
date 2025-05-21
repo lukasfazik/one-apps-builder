@@ -66,7 +66,7 @@ SCHED_REQUIREMENTS = "(HYPERVISOR=kvm)"
 USER_INPUTS = [
   CI_SERVER_TOKEN = "M|password|Gitlab runner token| |",
   CI_SERVER_URL = "M|text|Gitlab CI server url| |https://gitlab.fi.muni.cz",
-  CONCURRENT_JOBS = "O|range|Number of concurrent jobs to run|1..|1",
+  CONCURRENT_JOBS = "O|number|Number of concurrent jobs to run| |1",
   CONTAINER_ENGINE = "M|list|Container Engine|podman,docker|podman" ]
 VCPU = "1"
 VCPU_MAX = "256"
