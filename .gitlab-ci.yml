@@ -203,7 +203,6 @@ cleanup-job:
   stage: cleanup
   rules:
     - if: '"$[[ inputs.pipeline_type ]]" == "build-images" && "$[[ inputs.remove_artefacts ]]" == "true"'
-  when: always
   script:
     rm -rf "$DATA_VOLUME_PATH/$CI_PIPELINE_ID"
 
