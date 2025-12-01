@@ -38,6 +38,7 @@ if [ ! -f "$READY_FILE" ]; then
     # Stop and remove the default service
     sudo gitlab-runner stop
     sudo gitlab-runner uninstall
+    sudo systemctl mask gitlab-runner
     # Set /dev/kvm permissions via udev rule (applies after reboot)
     sudo echo 'KERNEL=="kvm", MODE="0666"' > /etc/udev/rules.d/99-gitlab-runner.rules
     # Set disk permissions via udev rule (applies after reboot)
@@ -63,7 +64,7 @@ if [ ! -f "$READY_FILE" ]; then
     # Configure the runner
     sudo -i -u "$CI_USER" DOCKER_HOST="$DOCKER_HOST" CI_SERVER_TOKEN="$CI_SERVER_TOKEN" CI_SERVER_URL="$CI_SERVER_URL" \
             gitlab-runner register --non-interactive --executor "docker" --docker-image alpine:latest --docker-devices "/dev/kvm"  --env "VM_ID=$VM_ID" --docker-volumes "/dev/:/host_dev/" --docker-volumes '$HOME/runner-cache:/cache' --docker-volumes '$HOME/runner-data:/mnt/data'
-    sudo gitlab-runner install --working-directory "/home/$CI_USER" --config "/home/$CI_USER/.gitlab-runner/config.toml" --init-user "$CI_USER"
+    sudo gitlab-runner install --service gitlab-runner-custom --working-directory "/home/$CI_USER" --config "/home/$CI_USER/.gitlab-runner/config.toml" --init-user "$CI_USER"
     # Reset the runner token because original token is visible in the VM configuration
     sudo -i -u "$CI_USER" gitlab-runner reset-token --all-runners
     # Set the number of concurrent jobs
