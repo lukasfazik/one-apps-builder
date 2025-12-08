@@ -9,6 +9,30 @@ if [ ! -f "$READY_FILE" ]; then
     # Update the system and install dependencies
     sudo apt-get update
     sudo apt full-upgrade -y
+    # Install and configure unattended-upgrades
+    sudo apt-get install unattended-upgrades -y
+    sudo tee /etc/apt/apt.conf.d/20auto-upgrades <<EOF
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";
+EOF
+    sudo tee /etc/apt/apt.conf.d/52unattended-upgrades-local <<EOF
+Unattended-Upgrade::Origins-Pattern {
+        "origin=Debian,codename=${distro_codename},label=Debian";
+        "origin=Debian,codename=${distro_codename},label=Debian-Security";
+        "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+        "origin=packages.gitlab.com/runner/gitlab-runner,label=gitlab-runner";
+};
+Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+Unattended-Upgrade::MinimalSteps "true";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
+Unattended-Upgrade::Automatic-Reboot-Time "04:00";
+EOF
+    sudo systemctl restart unattended-upgrades
     # Install container engine
     if [ "$CONTAINER_ENGINE" = "docker" ];then
         # Install dependencies
