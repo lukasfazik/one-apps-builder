@@ -23,11 +23,35 @@ if [ ! -f "$READY_FILE" ]; then
     sudo -i touch "$READY_FILE"
     # Update the system and install dependencies
     sudo apt-get update
-    sudo apt full-upgrade -y
+    sudo DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
+    # Install and configure unattended-upgrades
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install unattended-upgrades -y
+    sudo tee /etc/apt/apt.conf.d/20auto-upgrades <<EOF
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";
+EOF
+    sudo tee /etc/apt/apt.conf.d/52unattended-upgrades-local <<EOF
+Unattended-Upgrade::Origins-Pattern {
+        "origin=Debian,codename=${distro_codename},label=Debian";
+        "origin=Debian,codename=${distro_codename},label=Debian-Security";
+        "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+        "origin=packages.gitlab.com/runner/gitlab-runner,label=gitlab-runner";
+};
+Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+Unattended-Upgrade::MinimalSteps "true";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
+Unattended-Upgrade::Automatic-Reboot-Time "04:00";
+EOF
+    sudo systemctl restart unattended-upgrades
     # Install container engine
     if [ "$CONTAINER_ENGINE" = "docker" ];then
         # Install dependencies
-        sudo apt install ca-certificates curl -y
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install ca-certificates curl -y
         # Add Docker's official GPG key:
         sudo install -m 0755 -d /etc/apt/keyrings
         sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
@@ -38,29 +62,29 @@ if [ ! -f "$READY_FILE" ]; then
         $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
         # Install docker
-        sudo apt-get update && sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+        sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
         # Disable the rootful mode
         sudo systemctl disable --now docker.service docker.socket
         sudo rm /var/run/docker.sock
     else
         # Install podman
-        sudo apt-get update && sudo apt-get install podman podman-compose -y
+        sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install podman podman-compose -y
     fi
     # Add Gitlab repo
     curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | bash
     # Install gitlab runner
-    sudo apt-get update && sudo apt-get install gitlab-runner -y
+    sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install gitlab-runner -y
     # Stop and remove the default service
     sudo gitlab-runner stop
     sudo gitlab-runner uninstall
     sudo systemctl mask gitlab-runner
     # Set /dev/kvm permissions via udev rule (applies after reboot)
-    sudo echo 'KERNEL=="kvm", MODE="0666"' > /etc/udev/rules.d/99-gitlab-runner.rules
+    echo 'KERNEL=="kvm", MODE="0666"' | sudo tee /etc/udev/rules.d/999-gitlab-runner.rules
     # Set disk permissions via udev rule (applies after reboot)
-    echo 'SUBSYSTEM=="block", KERNEL=="sd[b-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-gitlab-runner.rules
-    echo 'SUBSYSTEM=="block", KERNEL=="sd[a-z][a-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/99-gitlab-runner.rules
+    echo 'SUBSYSTEM=="block", KERNEL=="sd[b-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/999-gitlab-runner.rules
+    echo 'SUBSYSTEM=="block", KERNEL=="sd[a-z][a-z]*", GROUP="gitlab-runner", MODE="0660"' | sudo tee -a /etc/udev/rules.d/999-gitlab-runner.rules
     # Prepare the user
-    sudo apt-get install -y uidmap
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y uidmap
     sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 "$CI_USER"
     sudo loginctl enable-linger "$CI_USER"
     if [ "$CONTAINER_ENGINE" = "docker" ];then
