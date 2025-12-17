@@ -14,6 +14,8 @@
 
 class ImageNames:
     def __init__(self, prefix: str="", architecture: str="", language: str="", suffix: str="") -> None:
+        self.prefix = prefix
+        self.suffix = suffix
         self._names = {
             # Windows 10
             "windows10Home": f"{prefix}Windows 10 Home 22H2 {architecture} {language}{suffix}",
@@ -82,4 +84,4 @@ class ImageNames:
         }
 
     def get_image_name(self, key: str) -> str:
-        return self._names.get(key, key)
+        return self._names.get(key, f"{self.prefix}{key}{self.suffix}")
