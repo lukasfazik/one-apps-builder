@@ -142,6 +142,7 @@ This configuration ensures that the runner initialization script executes upon V
 - Ensure your OpenNebula environment is properly configured to accept and run the generated images.
 - For advanced usage or troubleshooting, refer to the scripts and Makefiles in the `one-apps` repository.
 - The pipeline is designed to be extensible; you can add new stages or customize existing ones as needed.
+- The provided `template.tmpl` is used as a base for the newly built images. It is optimized for **Windows Client** editions. For **Windows Server** editions, the `TOPOLOGY` attribute can be removed. For **Linux** images, `LOCALTIME` and `HYPERV` should be set to `no`.
 
 ## Security
 
