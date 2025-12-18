@@ -46,7 +46,7 @@ spec:
       type: string
       default: ""
     image_name_suffix:
-      description: "Suffix for the image & template names in Opennebula"
+      description: "Suffix for the image & template names in OpenNebula"
       type: string
       default: " $CI_PIPELINE_ID"
     debug:
