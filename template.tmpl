@@ -13,20 +13,17 @@
 # limitations under the License.
 
 NAME="${TEMPLATE_NAME}"
-HYPERVISOR="kvm"
 
 CPU="0.5"
 CPU_MODEL=[ MODEL="EPYC-IBPB", FEATURES="svm" ]
 VCPU="4"
 TOPOLOGY=[ CORES="4", SOCKETS="1", THREADS="1" ]
 
-MEMORY="8192"
-MEMORY_RESIZE_MODE="BALLOONING"
-MEMORY_UNIT_COST="MB"
+MEMORY="4096"
 
 HOT_RESIZE=[
-  CPU_HOT_ADD_ENABLED="YES",
-  MEMORY_HOT_ADD_ENABLED="YES"
+  CPU_HOT_ADD_ENABLED="NO",
+  MEMORY_HOT_ADD_ENABLED="NO"
 ]
 
 OS=[
@@ -45,7 +42,8 @@ FEATURES=[
   HYPERV="yes",
   PAE="yes",
   LOCALTIME="yes",
-  VIRTIO_SCSI_QUEUES="auto"
+  VIRTIO_SCSI_QUEUES="auto",
+  VIRTIO_BLK_QUEUES="auto"
 ]
 
 GRAPHICS=[
@@ -63,7 +61,7 @@ VIDEO=[
 ]
 
 DISK=[
-  CACHE="unsafe",
+  CACHE="default",
   DEV_PREFIX="sd",
   DISCARD="unmap",
   IMAGE_ID="${IMAGE_ID}"
@@ -76,7 +74,7 @@ CONTEXT=[
   SSH_PUBLIC_KEY="$USER[SSH_PUBLIC_KEY]",
   USERNAME="$USER[USERNAME]",
   TIMEZONE="Central Europe Standard Time",
-  EJECT_CDROM="YES"
+  EJECT_CDROM="NO"
 ]
 
 
@@ -89,6 +87,5 @@ NIC=[
   NETWORK="503-usrpriv",
   NETWORK_UNAME="oneadmin",
   RDP="YES",
-  SSH="YES",
-  SECURITY_GROUPS="0"
+  SSH="YES"
 ]
