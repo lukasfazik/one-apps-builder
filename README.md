@@ -41,16 +41,17 @@ The pipeline is defined in `.gitlab-ci.yml` and consists of several stages:
 3. **build-images:** Builds the actual VM images using Packer and Makefiles.
 4. **deploy-images:** Deploys built images to the target environment.
 5. **cleanup:** Cleans up temporary files and artifacts.
+5. **cleanup:** Cleans up temporary files and artefacts.
 6. **delete-images:** (Manual) Deletes images and templates from OpenNebula.
 
 ### User Inputs
 
 The pipeline supports the following user inputs, which can be set as pipeline variables. The `distro_name`, `distro_versions`, and `distro_editions` variables are combined to create build targets defined in the `one-apps/Makefile.config` file.
 
-- `pipeline_type`: Type of pipeline run (`build-containers` or `build-images`).
-- `image_datastore_id`: Target OpenNebula datastore ID for image upload.
-- `image_name_prefix`: Prefix for generated image names.
-- `image_name_suffix`: Suffix for generated image names.
+ - `pipeline_type`: Type of pipeline run (`build-containers` or `build-images`, default: `build-images`).
+ - `image_datastore_id`: Target OpenNebula datastore ID for image upload (default: `100`).
+ - `image_name_prefix`: Prefix for generated image names (default: empty).
+ - `image_name_suffix`: Suffix for generated image names (default: ` $CI_PIPELINE_ID`).
 - `distro_name`: The base name of the distribution (e.g., `ubuntu`, `debian`, `windows`). **For all Windows builds, this value must be `windows`**, as this is used to trigger the correct pipeline jobs.
 - `distro_versions`: An array of distribution versions to build (e.g., `["12", "13"]` for Debian).
 - `distro_editions`: An array of distribution editions (e.g., `["Pro", "Education"]` for Windows, or `["", "min"]` for Ubuntu). An empty string `""` can be used if there is no edition.
